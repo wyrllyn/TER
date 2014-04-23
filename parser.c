@@ -3,7 +3,7 @@
 
 
 
-void parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
+int parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
 	FILE * file = NULL;	
 	char str[MAX_SIZE] = "";
 	file = fopen(fileName, "r");
@@ -49,14 +49,14 @@ void parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
 				}
 				else {
 					tok = str;
-					printf("\n str : %s", str);
+				//	printf("\n str : %s", str);
 					tok = strtok(tok, " ");
 
-					printf("\n\t tok 1  %d", atoi(tok));
+				//	printf("\n\t tok 1  %d", atoi(tok));
 					(*mat1)[col][line] = atoi(tok);
 					tok = NULL;
 					tok = strtok(tok, " ");
-					printf("\n\t tok 2  %d", atoi(tok));
+				//	printf("\n\t tok 2  %d", atoi(tok));
 					(*mat2)[col][line] = atoi(tok);
 
 					// variables
@@ -73,6 +73,7 @@ void parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
 	}
 	else {
 		printf("Could not open the file %s \n", fileName);
-		//return EXIT_FAILURE;
+		return EXIT_FAILURE;
 	}
+	return EXIT_SUCCESS;
 }

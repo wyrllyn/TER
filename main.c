@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "methods.h"
 
 int main(int argc, char** argv) {
 
@@ -7,41 +8,38 @@ int main(int argc, char** argv) {
 	int nbMat = 0;
 	int sizeMat = 0;	
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
+	char * testFileName = "res/test.dat";
 	int ** mat1 = NULL;
 	int ** mat2 = NULL;
-	int i = 0;
-	int j = 0;
+	int * sol;
 
-	parse("res/test.dat", &sizeMat, &nbMat, &mat1, &mat2);
+	if (parse(fileName, &sizeMat, &nbMat, &mat1, &mat2) == EXIT_FAILURE) {
+		return EXIT_FAILURE;
+	}
 	
-	printf(" \n %d   %d \n", sizeMat, nbMat);
+	printf("%d   %d \n", sizeMat, nbMat);
+//	print_mat(mat1, sizeMat);
+//	print_mat(mat2, sizeMat);
+
+	generate_random_sol(&sol, sizeMat);
+	for (int i = 0; i<sizeMat; i++) {
+		printf("\n %d", sol[i]);
+	}
+	printf("\n");
 
 	
 	////// //////
 
-	if (mat1 == NULL) {
-		printf("this is shit \n");
-	}
 
-	//ordre parsage col 1, ligne 1 col 2, ligne 2
-
-	for (i = 0; i < sizeMat; i++){
-		printf("\n");
-		for (j = 0; j < sizeMat; j++){ //
-			printf("%d ", mat1[j][i]);
-		}
-	}
-
-
-	printf("\n end");
-	//TODO : generate a random solution 
-
+	//TODO : calculate initial cost => how to save it ?
 	//TODO : objective function
 
+	//TODO : calculate additional cost for each solutions
+
+
+
 	//TODO : neighboors
-
 	//TODO : save neighboors
-
 	//TODO : method for pareto (to remove, to add ) using objective function
 
 
