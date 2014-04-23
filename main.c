@@ -1,46 +1,39 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "parser.h"
-
-#define MAX_SIZE 200
 
 int main(int argc, char** argv) {
 
 	
-	FILE * file = NULL;	
-	// TODO : argument string for file name //
+	//IDEA : do a function with : fileName, number of matrixes; matrix * number, size of matrix in arguments
+	int nbMat = 0;
+	int sizeMat = 0;	
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
-	char str[MAX_SIZE] = "";
-
-	/// PARSE ///
-	file = fopen(fileName, "r");
-
+	int ** mat1 = NULL;
+	int ** mat2 = NULL;
 	int i = 0;
+	int j = 0;
 
-	if (file != NULL) {
+	parse("res/test.dat", &sizeMat, &nbMat, &mat1, &mat2);
+	
+	printf(" \n %d   %d \n", sizeMat, nbMat);
 
-		// TODO: read
-		while(fgets(str, MAX_SIZE, file) != NULL) {
-
-			//ou fscanf ? 
-			printf(" read %d \n", i);
-			i++;
-			// get the N
-			// get size of matrix
-			// set N matrix
-			//fill N matrix 
-		}
-
-		fclose(file);
-	}
-	else {
-		printf("Could not open the file %s \n", fileName);
-		return EXIT_FAILURE;
-	}
+	
 	////// //////
 
+	if (mat1 == NULL) {
+		printf("this is shit \n");
+	}
 
-	printf("end");
+	//ordre parsage col 1, ligne 1 col 2, ligne 2
+
+	for (i = 0; i < sizeMat; i++){
+		printf("\n");
+		for (j = 0; j < sizeMat; j++){ //
+			printf("%d ", mat1[j][i]);
+		}
+	}
+
+
+	printf("\n end");
 	//TODO : generate a random solution 
 
 	//TODO : objective function
