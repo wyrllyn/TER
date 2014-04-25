@@ -53,17 +53,17 @@ int parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
 					tok = strtok(tok, " ");
 
 				//	printf("\n\t tok 1  %d", atoi(tok));
-					(*mat1)[col][line] = atoi(tok);
+					(*mat1)[line][col] = atoi(tok);
 					tok = NULL;
 					tok = strtok(tok, " ");
 				//	printf("\n\t tok 2  %d", atoi(tok));
-					(*mat2)[col][line] = atoi(tok);
+					(*mat2)[line][col] = atoi(tok);
 
 					// variables
-					col++;
-					if (col == *sizeMat && line != *sizeMat) {
-						col = 0;
-						line++;
+					line++;
+					if (line == *sizeMat && col!= *sizeMat) {
+						line = 0;
+						col++;
 					}
 				}
 			}
