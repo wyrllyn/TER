@@ -35,6 +35,7 @@ void init_row_value(int ** row, int ** mat, int size, int * sol);
 void init_col_value(int ** row, int ** mat, int size, int * sol);
 int init_cost_basic(int ** mat, int size, int * sol);
 int delta_index(int** mat, int* row, int* col, int * sol, int index);
+int* calculate_costs(m_data d, int ** mat1, int ** mat2, int index);
 int init_cost(int ** mat, int size, int* sol);
 
 void update_col(int size, int** col, int ** mat, int index, int delta);

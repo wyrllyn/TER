@@ -103,13 +103,18 @@ void init_col_value(int ** row, int ** mat, int size, int * sol) {
 // cost difference => delta
 int delta_index(int** mat, int* row, int* col, int * sol, int index) {
 	int del;
-	if (sol[index == 0])
+	if (sol[index] == 0)
 		del = 1;
 	else
 		del = -1;
-	printf("row index %d \n, col %d \n, mat val %d \n", row[index], col[index], mat[index][index]);
-
 	return (del * (row[index] + col[index] + mat[index][index]));
+}
+
+int* calculate_costs(m_data d, int ** mat1, int ** mat2, int index) {
+	int* temp = malloc(sizeof(int) * 2);
+	temp[0] = d.cost_1 + delta_index(mat1, d.row_1, d.col_1, d.solution, index);
+	temp[1] = d.cost_2 + delta_index(mat2, d.row_2, d.col_2, d.solution, index);
+	return temp;
 }
 
 ////// UPDATES ////////
@@ -134,16 +139,7 @@ void update_col(int size, int** col, int ** mat, int index, int delta) {
 
 first_s init(char* fileName) {
 	first_s toReturn;
-/*	int nbMat = 0;
-	int sizeMat = 0;	
 
-	int ** mat1 = NULL;
-	int ** mat2 = NULL;
-	int * sol;
-
-	m_data datas;
-
-	*/
 	// size + matrix
 	if (parse(fileName, &toReturn.dat.size, &toReturn.mat1, &toReturn.mat2) == EXIT_FAILURE) {
 		//return EXIT_FAILURE;
@@ -151,6 +147,9 @@ first_s init(char* fileName) {
 
 	// solution
 	generate_random_sol(&toReturn.dat.solution, toReturn.dat.size );
+	for(int i = 0; i < toReturn.dat.size ; i++) {
+		toReturn.dat.solution[i] = 0;
+	}
 
 	//costs
 	toReturn.dat.cost_1 = init_cost(toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
