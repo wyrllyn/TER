@@ -7,6 +7,6 @@
 
 #define MAX_SIZE 200
 
-int parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2);
+int parse(char* fileName, int* sizeMat, int*** mat1, int*** mat2);
 
 #endif

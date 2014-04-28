@@ -1,22 +1,5 @@
 #include "methods.h"
 
-// for each matrix
-
-typedef struct matrix_data {
-	// for both
-	int * solution;
-	// 1st matrix
-	int cost_1;
-	int * row_1;
-	int* column_1;
-	// 2nd matrix
-	int cost_2;
-	int * row_2;
-	int* column_2;
-	// matrix is always the same, don't put it here
-} m_data;
-
-
 // print methods ///////////////////////////////////////////////////
 void print_mat(int ** mat, int size) {
 	int i = 0;
@@ -37,6 +20,11 @@ void print_tab(int* tab, int size) {
 	}
 	printf("\n");
 }
+
+void print_cost(m_data d) {
+	printf(" cost 1 %d\ncost 2 %d\n   ", d.cost_1, d.cost_2);
+}
+
 
 ////////////////   INIT METHODS///////////////////////////////////////////////////////////////
 
@@ -86,7 +74,8 @@ void init_row_value(int ** row, int ** mat, int size, int * sol) {
 	for (int i = 0; i < size ; i++) {
 		temp = 0;
 		for (int j =0; j < size; j++) {
-			temp += mat[i][j] * sol[j];
+			if (i != j)
+				temp += mat[i][j] * sol[j];
 		}
 		(*row)[i] = temp;
 	}
@@ -99,7 +88,8 @@ void init_col_value(int ** row, int ** mat, int size, int * sol) {
 	for (int j = 0; j < size ; j++) {
 		temp = 0;
 		for (int i =0; i < size; i++) {
-			temp += mat[i][j] * sol[i];
+			if (i != j)
+				temp += mat[i][j] * sol[i];
 		}
 		(*row)[j] = temp;
 	}
@@ -107,7 +97,7 @@ void init_col_value(int ** row, int ** mat, int size, int * sol) {
 
 ////// EVALUATION /////
 
-// evaluation before adding solution ?
+// evaluation before adding solution 
 
 
 // cost difference => delta
@@ -122,21 +112,54 @@ int delta_index(int** mat, int* row, int* col, int * sol, int index) {
 	return (del * (row[index] + col[index] + mat[index][index]));
 }
 
+////// UPDATES ////////
+
+
+// modification : TODO : something for delta
+void update_row(int size, int ** row, int ** mat, int index, int delta) {
+	for (int i = 0; i < size; i++) {
+		if (index != i)
+			(*row)[i] += mat[i][index] * delta;
+	}
+}
+
+void update_col(int size, int** col, int ** mat, int index, int delta) {
+	for (int j = 0; j < size; j++) {
+		if (index != j)
+			(*col)[j] += mat[index][j] * delta;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int init() {
-	int nbMat = 0;
+first_s init(char* fileName) {
+	first_s toReturn;
+/*	int nbMat = 0;
 	int sizeMat = 0;	
-	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
-	char * testFileName = "res/test.dat";
+
 	int ** mat1 = NULL;
 	int ** mat2 = NULL;
 	int * sol;
 
-	if (parse(fileName, &sizeMat, &nbMat, &mat1, &mat2) == EXIT_FAILURE) {
-		return EXIT_FAILURE;
+	m_data datas;
+
+	*/
+	// size + matrix
+	if (parse(fileName, &toReturn.dat.size, &toReturn.mat1, &toReturn.mat2) == EXIT_FAILURE) {
+		//return EXIT_FAILURE;
 	}
 
-	generate_random_sol(&sol, sizeMat);
-	return 0;
+	// solution
+	generate_random_sol(&toReturn.dat.solution, toReturn.dat.size );
+
+	//costs
+	toReturn.dat.cost_1 = init_cost(toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
+	toReturn.dat.cost_2 = init_cost(toReturn.mat2, toReturn.dat.size, toReturn.dat.solution);
+	//row and col
+	init_row_value(&toReturn.dat.row_1, toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
+	init_row_value(&toReturn.dat.row_2, toReturn.mat2, toReturn.dat.size, toReturn.dat.solution);
+	init_col_value(&toReturn.dat.col_1, toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
+	init_col_value(&toReturn.dat.col_2, toReturn.mat2, toReturn.dat.size, toReturn.dat.solution);
+
+	return toReturn;
 }

@@ -5,14 +5,13 @@ int main(int argc, char** argv) {
 
 	
 	//IDEA : do a function with : fileName, number of matrixes; matrix * number, size of matrix in arguments
-	int nbMat = 0;
 	int sizeMat = 0;	
 
 	// files
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
 	char * testFileName = "res/test.dat";
 	// matrix
-	int ** mat1 = NULL;
+/*	int ** mat1 = NULL;
 	int ** mat2 = NULL;
 	// solution
 	int * sol;
@@ -22,14 +21,24 @@ int main(int argc, char** argv) {
 	int* col1;
 	int * col2;
 
-	if (parse(testFileName, &sizeMat, &nbMat, &mat1, &mat2) == EXIT_FAILURE) {
+	if (parse(testFileName, &sizeMat, &mat1, &mat2) == EXIT_FAILURE) {
 		return EXIT_FAILURE;
 	}
 	
-	printf("%d   %d \n", sizeMat, nbMat);
+	printf("%d  \n", sizeMat);
 
-	generate_random_sol(&sol, sizeMat);
+	generate_random_sol(&sol, sizeMat);*/
 
+	////// testing init methods
+	first_s solu = init(fileName);
+
+	printf("%d \n ", solu.dat.size);
+
+//	print_mat(solu.mat1, solu.dat.size);
+//	print_tab(solu.dat.solution, solu.dat.size);
+	print_cost(solu.dat);
+
+/*
 	// testing
 	for (int i = 0; i < sizeMat; i++) {
 		printf("test \n");
@@ -43,7 +52,7 @@ int main(int argc, char** argv) {
 	printf(" cost 1 is : %d \n ", init_cost(mat1, sizeMat, sol));
 	printf(" cost 2 is : %d \n ", init_cost(mat2, sizeMat, sol));
 
-	print_mat(mat1, sizeMat);
+
 	print_mat(mat2, sizeMat);
 
 
@@ -56,19 +65,20 @@ int main(int argc, char** argv) {
 	init_row_value(&row2, mat2, sizeMat, sol);
 	init_col_value(&col2, mat2, sizeMat, sol);
 
-	printf("if 0 is removed %d \n", delta_index(mat1, row1, col1, sol, 0));
+
+	print_tab(row1, sizeMat);
+	print_tab(col1, sizeMat);
+
+	update_row(sizeMat, &row1, mat1, 2, -1 );
+	update_col(sizeMat, &col1, mat1, 2, -1 );
 
 
+	print_tab(row1, sizeMat);
+	print_tab(col1, sizeMat);
 
-	// end of testin'
+*/
 
-
-
-
-	//TODO : calculate initial cost => how to save it ?
 	//TODO : objective function
-
-	//TODO : calculate additional cost for each solutions
 
 
 	//TODO : neighboors

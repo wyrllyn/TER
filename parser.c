@@ -3,7 +3,7 @@
 
 
 
-int parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
+int parse(char* fileName, int* sizeMat, int*** mat1, int*** mat2) {
 	FILE * file = NULL;	
 	char str[MAX_SIZE] = "";
 	file = fopen(fileName, "r");
@@ -32,9 +32,7 @@ int parse(char* fileName, int* sizeMat, int* nbMat, int*** mat1, int*** mat2) {
     			   		if ( strcmp( tok, "MUBQP") == 0 ){
     			   			temp = 0;
     			   		}
-    			   		if (temp == 2)
-    			   			*nbMat = atoi(tok);
-    			   		else if (temp == 3) {
+    			   		if (temp == 3) {
     			   			*sizeMat = atoi(tok);
     			   			*mat1 = (int**)malloc(sizeof(int*) * (*sizeMat));
     			   			*mat2 = (int**)malloc(sizeof(int*) * (*sizeMat));
