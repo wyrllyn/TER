@@ -1,5 +1,23 @@
 #include "methods.h"
 
+// for each matrix
+
+typedef struct matrix_data {
+	// for both
+	int * solution;
+	// 1st matrix
+	int cost_1;
+	int * row_1;
+	int* column_1;
+	// 2nd matrix
+	int cost_2;
+	int * row_2;
+	int* column_2;
+	// matrix is always the same, don't put it here
+} m_data;
+
+
+// print methods ///////////////////////////////////////////////////
 void print_mat(int ** mat, int size) {
 	int i = 0;
 	int j = 0;
@@ -20,6 +38,10 @@ void print_tab(int* tab, int size) {
 	printf("\n");
 }
 
+////////////////   INIT METHODS///////////////////////////////////////////////////////////////
+
+/// first solution used
+
 void generate_random_sol(int ** tab, int size){
 	int i = 0;
 	*tab = malloc(sizeof(int) * size);
@@ -28,12 +50,42 @@ void generate_random_sol(int ** tab, int size){
 	}
 }
 
+// Initial cost
+
+/*
+// debug
+int init_cost_basic(int ** mat, int size, int* sol) {
+	int tmp = 0;
+	for (int i =0; i < size; i++) {
+		for (int j = 0; j< size; j++) {
+				tmp += sol[i]* sol[j]* mat[i][j];
+		}
+	}
+	return tmp;
+}
+
+*/
+
+
+int init_cost(int ** mat, int size, int* sol) {
+	int tmp = 0;
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < i; j++) {
+			tmp += sol[i]*sol[j]*(mat[i][j]+ mat[j][i]);
+		}
+		tmp += sol[i] * mat[i][i];
+	}
+	return tmp;
+}
+
+// row and column values 
+
 void init_row_value(int ** row, int ** mat, int size, int * sol) {
 	(*row) = malloc(size*sizeof(int));
 	int temp = 0;
 	for (int i = 0; i < size ; i++) {
 		temp = 0;
-		for (int j =0; j < i; j++) {
+		for (int j =0; j < size; j++) {
 			temp += mat[i][j] * sol[j];
 		}
 		(*row)[i] = temp;
@@ -46,80 +98,28 @@ void init_col_value(int ** row, int ** mat, int size, int * sol) {
 	int temp = 0;
 	for (int j = 0; j < size ; j++) {
 		temp = 0;
-		for (int i =0; i < j; i++) {
+		for (int i =0; i < size; i++) {
 			temp += mat[i][j] * sol[i];
 		}
 		(*row)[j] = temp;
 	}
 }
 
+////// EVALUATION /////
+
 // evaluation before adding solution ?
 
 
 // cost difference => delta
-int delta_index(int** matrix, int* row, int* col, int * sol, int index) {
+int delta_index(int** mat, int* row, int* col, int * sol, int index) {
 	int del;
 	if (sol[index == 0])
 		del = 1;
 	else
 		del = -1;
+	printf("row index %d \n, col %d \n, mat val %d \n", row[index], col[index], mat[index][index]);
 
 	return (del * (row[index] + col[index] + mat[index][index]));
-}
-
-
-
-
-// initial_cost => structure of 2 int ? => don't forget : 2 matrix not one
-
-//// chose between this
-
-void triang_mat(int *** mat, int size) {
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < i; j++){
-			(*mat)[i][j] += (*mat)[j][i];
-			(*mat)[j][i] = 0;
-		}
-	}
-}
-
-int init_cost_triang(int ** mat, int size, int* sol) {
-	int tmp = 0;
-	int val = 0;
-	for (int i = 0; i < size; i++) {
-		tmp = 0;
-		for (int j = 0; j < i; j++) {
-			tmp += sol[j] * mat[i][j];
-		}
-		tmp += mat[i][i];
-		val += tmp * sol[i];
-	}
-	return val;
-}
-
-
-///////////// this
-int init_cost_basic(int ** mat, int size, int* sol) {
-	int tmp = 0;
-	for (int i =0; i < size; i++) {
-		for (int j = 0; j< size; j++) {
-				tmp += sol[i]* sol[j]* mat[i][j];
-		}
-	}
-	return tmp;
-}
-
-
-//// or this
-int init_cost_basic_2(int ** mat, int size, int* sol) {
-	int tmp = 0;
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < i; j++) {
-			tmp += sol[i]*sol[j]*(mat[i][j]+ mat[j][i]);
-		}
-		tmp += sol[i] * mat[i][i];
-	}
-	return tmp;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

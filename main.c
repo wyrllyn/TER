@@ -1,6 +1,5 @@
 #include "parser.h"
 #include "methods.h"
-#include <time.h>
 
 int main(int argc, char** argv) {
 
@@ -8,82 +7,68 @@ int main(int argc, char** argv) {
 	//IDEA : do a function with : fileName, number of matrixes; matrix * number, size of matrix in arguments
 	int nbMat = 0;
 	int sizeMat = 0;	
+
+	// files
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
 	char * testFileName = "res/test.dat";
+	// matrix
 	int ** mat1 = NULL;
 	int ** mat2 = NULL;
+	// solution
 	int * sol;
-	clock_t t1, t2;
-	float temps;
+	// rows & columns
+	int * row1;
+	int * row2;
+	int* col1;
+	int * col2;
 
-	if (parse(fileName, &sizeMat, &nbMat, &mat1, &mat2) == EXIT_FAILURE) {
+	if (parse(testFileName, &sizeMat, &nbMat, &mat1, &mat2) == EXIT_FAILURE) {
 		return EXIT_FAILURE;
 	}
 	
 	printf("%d   %d \n", sizeMat, nbMat);
 
-
 	generate_random_sol(&sol, sizeMat);
 
-	//printf(" value test %d %d \n", mat1[1][999], mat1[999][1]);
-
-
-/* ///// testing /////
-
-	int * testSol = (int*) malloc(sizeof(int)* sizeMat);
+	// testing
 	for (int i = 0; i < sizeMat; i++) {
-		testSol[i] = 0;
+		printf("test \n");
+		sol[i] = 0;
 	}
 
-	t1 = clock();
 
-	init_cost_basic(mat1, sizeMat, sol);
+	sol[0] = 1;
+	sol[2] = 1;
 
-	t2 = clock();
-	temps = (float) (t2 - t1) / CLOCKS_PER_SEC;
-	printf(" time %f \n", temps);
-
-	t1 = clock();
-
-	init_cost_basic_2(mat1, sizeMat, sol);
-
-	t2 = clock();
-	temps = (float) (t2 - t1) / CLOCKS_PER_SEC;
-	printf(" b2 time %f \n", temps);
-
-		t1 = clock();
-
-
-	triang_mat(&mat1, sizeMat);
-	init_cost_triang(mat1, sizeMat, sol);
-
-	t2 = clock();
-	temps = (float) ((t2 - t1)/ CLOCKS_PER_SEC);
-	printf(" reduc time %f  \n", temps);
-
-	
-
-	//print_mat(mat1, sizeMat);
-	//printf("basic 2 cost %d  \n", init_cost_basic_2(mat1, sizeMat, testSol));
-	//printf("basic  cost %d  \n", init_cost_basic(mat1, sizeMat, testSol));
-
-	triang_mat(&mat1, sizeMat);
+	printf(" cost 1 is : %d \n ", init_cost(mat1, sizeMat, sol));
+	printf(" cost 2 is : %d \n ", init_cost(mat2, sizeMat, sol));
 
 	print_mat(mat1, sizeMat);
-	printf(" cost %d  \n", init_cost_basic_2(mat1, sizeMat, testSol));
+	print_mat(mat2, sizeMat);
 
 
-	printf(" cost %d  \n", init_cost_triang(mat1, sizeMat, testSol));
+	printf(" cost 1 is : %d \n ", init_cost(mat1, sizeMat, sol));
 
-	*/
-	////// //////
+
+	init_row_value(&row1, mat1, sizeMat, sol);
+	init_col_value(&col1, mat1, sizeMat, sol);
+
+	init_row_value(&row2, mat2, sizeMat, sol);
+	init_col_value(&col2, mat2, sizeMat, sol);
+
+	printf("if 0 is removed %d \n", delta_index(mat1, row1, col1, sol, 0));
+
+
+
+	// end of testin'
+
+
 
 
 	//TODO : calculate initial cost => how to save it ?
 	//TODO : objective function
 
 	//TODO : calculate additional cost for each solutions
-
 
 
 	//TODO : neighboors
