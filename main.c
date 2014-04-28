@@ -1,5 +1,4 @@
-#include "parser.h"
-#include "methods.h"
+#include "print.h"
 
 int main(int argc, char** argv) {
 
@@ -15,19 +14,37 @@ int main(int argc, char** argv) {
 
 	printf("%d \n ", solu.dat.size);
 
-	print_tab(solu.dat.solution, solu.dat.size);
+//	print_tab(solu.dat.solution, solu.dat.size);
 
 	print_mat(solu.mat1, solu.dat.size);
+
+	//	print_tab(solu.dat.row_1, solu.dat.size);
 
 	print_mat(solu.mat2, solu.dat.size);
 
 	print_cost(solu.dat);
 	int * tmp;
+	m_data data_tmp;
 
+	m_data * solutions;
+	int sizeSol = 0;
+
+// this test adds every solution 
 	for (int i = 0; i < solu.dat.size; i++) {
 		tmp = calculate_costs(solu.dat, solu.mat1, solu.mat2, i);
-		printf("%d :  %d %d \n", i, tmp[0], tmp[1]);
+		data_tmp = to_m_data(i, solu.dat, tmp, solu.mat1, solu.mat2);
+		sizeSol++;
+		solutions = add_sol(solutions, data_tmp, sizeSol);
 	}
+
+	for (int i = 0; i < sizeSol; i++) {
+		printf("index i = %d \n", i);
+		print_tab(solutions[i].solution, solutions[i].size);
+		print_tab(solutions[i].row_1, solutions[i].size);
+		print_cost(solutions[i]);
+	}
+
+	//print_tab(solu.dat.row_1, solu.dat.size); */
 
 	//TODO : objective function
 

@@ -1,5 +1,6 @@
 #include "methods.h"
 
+
 // print methods ///////////////////////////////////////////////////
 void print_mat(int ** mat, int size) {
 	int i = 0;
@@ -22,8 +23,63 @@ void print_tab(int* tab, int size) {
 }
 
 void print_cost(m_data d) {
-	printf(" cost 1 %d\ncost 2 %d\n   ", d.cost_1, d.cost_2);
+	printf("cost 1 %d\ncost 2 %d\n   ", d.cost_1, d.cost_2);
 }
+
+
+
+
+//// to move later -- add and remove solutions ////
+
+
+
+m_data * add_sol(m_data * solutions, m_data toAdd, int size) {
+	m_data * tmp = malloc(sizeof(m_data) * size);
+
+	for (int i  = 0; i < size - 1; i++) {
+		tmp[i] = solutions[i];
+	}
+	tmp[size - 1] = toAdd;
+	return tmp;
+}
+
+m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2) {
+	m_data tmp;
+	int delta = 1;
+
+	tmp.size = d.size;
+	tmp.cost_1 = cost[0];
+	tmp.cost_2 = cost[1];
+
+	tmp.solution = malloc(sizeof(int) * tmp.size);
+	for (int i = 0; i < tmp.size; i++)
+		tmp.solution[i] = d.solution[i];
+
+	if (tmp.solution[index] == 0 ) {
+		tmp.solution[index] = 1;
+		delta = 1;
+	}
+	else {
+		tmp.solution[index] = 0;
+		delta = -1;
+	}
+
+	tmp.row_1 = calculate_row(tmp.size, d.row_1, mat1, index, delta);
+	tmp.row_2 = calculate_row(tmp.size, d.row_2, mat2, index, delta);
+
+	tmp.col_1 = calculate_col(tmp.size, d.col_1, mat1, index, delta);
+	tmp.col_2 = calculate_col(tmp.size, d.col_2, mat2, index, delta);
+
+
+
+	//TODO update !
+
+	return tmp;
+
+}
+
+
+
 
 
 ////////////////   INIT METHODS///////////////////////////////////////////////////////////////
@@ -135,6 +191,26 @@ void update_col(int size, int** col, int ** mat, int index, int delta) {
 	}
 }
 
+int * calculate_row(int size, int * row, int** mat, int index, int delta) {
+	int * tmp = malloc(sizeof(int) * size);
+	for (int i = 0; i < size; i++) {
+		if (index != i)
+			tmp[i] = mat[i][index] * delta + row[i];
+		else tmp[i] = 0;
+	}
+	return tmp;
+}
+
+int * calculate_col(int size, int * col, int** mat, int index, int delta) {
+	int * tmp = malloc(sizeof(int) * size);
+	for (int j = 0; j < size; j++) {
+		if (index != j)
+			tmp[j] = mat[index][j] * delta + col[j];
+		else tmp[j] = 0;
+	}
+	return tmp;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 first_s init(char* fileName) {
@@ -150,6 +226,7 @@ first_s init(char* fileName) {
 	for(int i = 0; i < toReturn.dat.size ; i++) {
 		toReturn.dat.solution[i] = 0;
 	}
+	toReturn.dat.solution[0] = 1;
 
 	//costs
 	toReturn.dat.cost_1 = init_cost(toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
@@ -159,6 +236,7 @@ first_s init(char* fileName) {
 	init_row_value(&toReturn.dat.row_2, toReturn.mat2, toReturn.dat.size, toReturn.dat.solution);
 	init_col_value(&toReturn.dat.col_1, toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
 	init_col_value(&toReturn.dat.col_2, toReturn.mat2, toReturn.dat.size, toReturn.dat.solution);
+
 
 	return toReturn;
 }

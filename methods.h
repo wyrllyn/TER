@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "parser.h"
 
+
+
 typedef struct matrix_data {
 	// for both
 	int size;
@@ -26,10 +28,10 @@ typedef struct first_sol {
 	m_data dat;
 } first_s;
 
-
 void print_mat(int ** mat, int size);
 void print_tab(int* tab, int size);
 void print_cost(m_data d);
+
 void generate_random_sol(int ** tab, int size);
 void init_row_value(int ** row, int ** mat, int size, int * sol);
 void init_col_value(int ** row, int ** mat, int size, int * sol);
@@ -40,6 +42,15 @@ int init_cost(int ** mat, int size, int* sol);
 
 void update_col(int size, int** col, int ** mat, int index, int delta);
 void update_row(int size, int ** row, int ** mat, int index, int delta);
+
+int * calculate_row(int size, int * row, int** mat, int index, int delta);
+int * calculate_col(int size, int * col, int** mat, int index, int delta);
+
+m_data * add_sol(m_data * solutions, m_data toAdd, int size);
+
+m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2);
+
+
 first_s init(char* fileName);
 //generate neighboors
 
