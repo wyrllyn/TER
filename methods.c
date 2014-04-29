@@ -33,6 +33,19 @@ void print_cost(m_data d) {
 
 
 
+
+// beware => duplication into toAdd
+int * add(int* tab, int toadd, int size) {
+	int * tmp = malloc(sizeof(int) * size);
+
+	for (int i = 0; i < size - 1; i++) {
+		tmp[i] = tab[i];
+	}
+
+	tmp[size - 1] = toadd;
+	return tmp;
+}
+
 m_data * add_sol(m_data * solutions, m_data toAdd, int size) {
 	m_data * tmp = malloc(sizeof(m_data) * size);
 
@@ -40,6 +53,24 @@ m_data * add_sol(m_data * solutions, m_data toAdd, int size) {
 		tmp[i] = solutions[i];
 	}
 	tmp[size - 1] = toAdd;
+	return tmp;
+}
+
+
+m_data * remove_sol(m_data * solutions, int size, int * toRemove, int rmsize) {
+	m_data * tmp = malloc(sizeof(m_data) * (size - rmsize));
+	int a = 0;
+
+	for (int i = 0; i < size - rmsize; i++) {
+		for (int j = 0; j < rmsize ;j++) {
+			if (a == toRemove[j]) {
+				a++;
+				break;
+			}
+		}
+		tmp[i] = solutions[a];
+		a++;
+	}
 	return tmp;
 }
 
@@ -69,10 +100,6 @@ m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2) {
 
 	tmp.col_1 = calculate_col(tmp.size, d.col_1, mat1, index, delta);
 	tmp.col_2 = calculate_col(tmp.size, d.col_2, mat2, index, delta);
-
-
-
-	//TODO update !
 
 	return tmp;
 
@@ -223,6 +250,8 @@ first_s init(char* fileName) {
 
 	// solution
 	generate_random_sol(&toReturn.dat.solution, toReturn.dat.size );
+
+	//to remove
 	for(int i = 0; i < toReturn.dat.size ; i++) {
 		toReturn.dat.solution[i] = 0;
 	}

@@ -46,7 +46,10 @@ void update_row(int size, int ** row, int ** mat, int index, int delta);
 int * calculate_row(int size, int * row, int** mat, int index, int delta);
 int * calculate_col(int size, int * col, int** mat, int index, int delta);
 
+int * add(int* tab, int toadd, int size);
+
 m_data * add_sol(m_data * solutions, m_data toAdd, int size);
+m_data * remove_sol(m_data * solutions, int size, int * toRemove, int rmsize);
 
 m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2);
 
