@@ -70,9 +70,8 @@ m_data * remove_sol(m_data * solutions, int size, int * toRemove, int rmsize) {
 
 	for (int i = 0; i < size - rmsize; i++) {
 		for (int j = 0; j < rmsize ;j++) {
-			if (a == toRemove[j]) {
+			if (isInto(a, toRemove, rmsize) == 1) {
 				a++;
-				break;
 			}
 		}
 		tmp[i] = solutions[a];
@@ -259,10 +258,10 @@ first_s init(char* fileName) {
 	generate_random_sol(&toReturn.dat.solution, toReturn.dat.size );
 
 	//to remove
-	for(int i = 0; i < toReturn.dat.size ; i++) {
+/*	for(int i = 0; i < toReturn.dat.size ; i++) {
 		toReturn.dat.solution[i] = 0;
 	}
-	toReturn.dat.solution[0] = 1;
+	toReturn.dat.solution[0] = 1; */
 
 	//costs
 	toReturn.dat.cost_1 = init_cost(toReturn.mat1, toReturn.dat.size, toReturn.dat.solution);
@@ -308,15 +307,16 @@ m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol) {
 	int * toRem;
 
 	for (int i = 0; i < (*sizeSol); i++) {
-		for (int j = i + 1; j < (*sizeSol); j++) {
-			if((solutions[i].cost_1 > solutions[j].cost_1 && solutions[i].cost_2 > solutions [j].cost_2) && (isInto(j, toRem, rmsize) == 0)){
+		for (int j = i+1; j < (*sizeSol); j++) {
+			if((solutions[i].cost_1 > solutions[j].cost_1 && solutions[i].cost_2 > solutions[j].cost_2) && (isInto(j, toRem, rmsize) == 0)){
 				rmsize++;
 				toRem = add(toRem, j, rmsize);
 			}
-			else if ((solutions[i].cost_1 < solutions[j].cost_1 && solutions[i].cost_2 < solutions [j].cost_2) && (isInto(i, toRem, rmsize) == 0)) {
+			else if ((solutions[i].cost_1 < solutions[j].cost_1 && solutions[i].cost_2 < solutions[j].cost_2) &&  (isInto(i, toRem, rmsize) == 0)) {
 				rmsize++;
 				toRem = add(toRem, i, rmsize);
-			}
+				break;
+			} 
 		}
 	}
 

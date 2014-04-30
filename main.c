@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 
 	m_data * solutions;
 	int sizeSol = 0;
-	first_s solu = init(testFileName);
+	first_s solu = init(fileName);
 
 	printf("%d \n ", solu.dat.size);
 
@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
 		//print_tab(solutions[i].row_1, solutions[i].size);
 		print_cost(neigh[i]);
 	}
+
 
 	// idea : function with current sol (init sol first...) => when iteration is done : verification of flags, comparison neigh / currentSol values, add good neigh. Ends with iteration or flag I guess
 	// question : how to flag ? 
