@@ -31,7 +31,14 @@ void print_cost(m_data d) {
 
 //// to move later -- add and remove solutions ////
 
-
+// return 0 if false, 1 if true
+int isInto(int j, int* toRem, int rmsize) {
+	for (int i = 0; i < rmsize; i++) {
+		if (toRem[i] == j)
+			return 1;
+	}
+	return 0;
+}
 
 
 // beware => duplication into toAdd
@@ -268,4 +275,55 @@ first_s init(char* fileName) {
 
 
 	return toReturn;
+}
+
+
+m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol) {
+
+	int * tmp;
+	m_data data_tmp;
+
+	m_data * solutions;
+
+// adds solutions
+	for (int i = 0; i < data.size; i++) {
+		tmp = calculate_costs(data, mat1, mat2, i);
+		if (tmp[0] >= data.cost_1 || tmp[1] >= data.cost_2) {
+			data_tmp = to_m_data(i, data, tmp, mat1, mat2);
+			(*sizeSol)++;
+			solutions = add_sol(solutions, data_tmp, (*sizeSol));
+		}
+	}
+	
+
+/*	for (int i = 0; i < (*sizeSol); i++) {
+		printf("index i = %d \n", i);
+//		print_tab(solutions[i].solution, solutions[i].size);
+		//print_tab(solutions[i].row_1, solutions[i].size);
+		print_cost(solutions[i]);
+	}
+	*/
+
+	int rmsize = 0;
+	int * toRem;
+
+	for (int i = 0; i < (*sizeSol); i++) {
+		for (int j = i + 1; j < (*sizeSol); j++) {
+			if((solutions[i].cost_1 > solutions[j].cost_1 && solutions[i].cost_2 > solutions [j].cost_2) && (isInto(j, toRem, rmsize) == 0)){
+				rmsize++;
+				toRem = add(toRem, j, rmsize);
+			}
+			else if ((solutions[i].cost_1 < solutions[j].cost_1 && solutions[i].cost_2 < solutions [j].cost_2) && (isInto(i, toRem, rmsize) == 0)) {
+				rmsize++;
+				toRem = add(toRem, i, rmsize);
+			}
+		}
+	}
+
+//	print_tab(toRem, rmsize);
+
+	solutions = remove_sol(solutions,(*sizeSol), toRem, rmsize);
+	(*sizeSol) -= rmsize;
+
+	return solutions;
 }
