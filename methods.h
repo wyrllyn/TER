@@ -34,6 +34,11 @@ void print_cost(m_data d);
 
 int isInto(int j, int* toRem, int rmsize);
 
+int isTheSame (int * first, int * second, int size);
+
+m_data * add_neigh(m_data * gSol, int gSize, m_data * neigh, int nSize);
+
+
 void generate_random_sol(int ** tab, int size);
 void init_row_value(int ** row, int ** mat, int size, int * sol);
 void init_col_value(int ** row, int ** mat, int size, int * sol);
@@ -57,7 +62,7 @@ m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2);
 
 
 first_s init(char* fileName);
-m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol);
-//generate neighboors
+m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol, m_data* gSol, int sizeG);
+void removeGlobal(m_data * neigh, int sizeN, m_data** sol, int * sizeSol);
 
 #endif

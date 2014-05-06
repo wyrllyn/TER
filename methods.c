@@ -63,6 +63,17 @@ m_data * add_sol(m_data * solutions, m_data toAdd, int size) {
 	return tmp;
 }
 
+m_data * add_neigh(m_data * gSol, int gSize, m_data * neigh, int nSize) {
+	m_data * tmp = malloc(sizeof(m_data) * (gSize + nSize));
+	for (int i = 0; i < gSize; i++) {
+		tmp[i] = gSol[i];
+	}
+	for (int i = 0; i < nSize; i++) {
+		tmp[i + gSize] = neigh[i];
+	}
+	return tmp;
+}
+
 
 m_data * remove_sol(m_data * solutions, int size, int * toRemove, int rmsize) {
 	m_data * tmp = malloc(sizeof(m_data) * (size - rmsize));
@@ -112,7 +123,16 @@ m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2) {
 }
 
 
+/// COMPARE
 
+//return 0 if false, 1 if true
+int isTheSame (int * first, int * second, int size) {
+	for (int i = 0; i < size; i++) {
+		if (first[i] != second[i])
+			return 0;
+	}
+	return 1;
+}
 
 
 ////////////////   INIT METHODS///////////////////////////////////////////////////////////////
@@ -209,7 +229,6 @@ int* calculate_costs(m_data d, int ** mat1, int ** mat2, int index) {
 ////// UPDATES ////////
 
 
-// modification : TODO : something for delta
 void update_row(int size, int ** row, int ** mat, int index, int delta) {
 	for (int i = 0; i < size; i++) {
 		if (index != i)
@@ -277,12 +296,14 @@ first_s init(char* fileName) {
 }
 
 
-m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol) {
+m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol, m_data* gSol, int sizeG) {
 
 	int * tmp;
 	m_data data_tmp;
 
 	m_data * solutions;
+
+
 
 // adds solutions
 	for (int i = 0; i < data.size; i++) {
@@ -325,5 +346,41 @@ m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol) {
 	solutions = remove_sol(solutions,(*sizeSol), toRem, rmsize);
 	(*sizeSol) -= rmsize;
 
+	rmsize = 0;
+	free(toRem);
+	for (int i = 0; i < (*sizeSol); i++) {
+		for (int j = 0; j < sizeG; j++) {
+			if (isTheSame(solutions[i].solution, gSol[j].solution, data.size) == 1 && isInto(i, toRem, rmsize) == 0 ) {
+				rmsize++;
+				toRem = add(toRem, i, rmsize);
+			}
+		}
+	}
+
+	solutions = remove_sol(solutions,(*sizeSol), toRem, rmsize);
+	(*sizeSol) -= rmsize;
+
 	return solutions;
+}
+
+// removes from sol
+
+void removeGlobal(m_data * neigh, int sizeN, m_data** sol, int * sizeSol) {
+	int* toRem;
+	int rmsize = 0;
+	// i neigh - j sol
+	for (int j = 0; j < (*sizeSol); j++) { 
+		for (int i = 0; i < sizeN; i++) {
+			if ((neigh[i].cost_1 > (*sol)[j].cost_1 && neigh[i].cost_2 > (*sol)[j].cost_2) && (isInto(j, toRem, rmsize) == 0)) {
+				rmsize++;
+				toRem = add (toRem, j, rmsize);	
+				printf(" \n %d added --- ", j);		
+			}
+		}
+	}
+
+	print_tab(toRem, rmsize);
+
+	(*sol) = remove_sol((*sol), (*sizeSol), toRem, rmsize);
+	(*sizeSol) -= rmsize;
 }
