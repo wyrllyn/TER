@@ -2,6 +2,7 @@
 
 
 // print methods ///////////////////////////////////////////////////
+
 void print_mat(int ** mat, int size) {
 	int i = 0;
 	int j = 0;
@@ -26,7 +27,7 @@ void print_cost(m_data d) {
 	printf("cost 1 %d\ncost 2 %d\n   ", d.cost_1, d.cost_2);
 }
 
-
+//////////////////////////////////////////////////////////////////////////////
 
 
 //// to move later -- add and remove solutions ////
@@ -43,68 +44,49 @@ int isInto(int j, int* toRem, int rmsize) {
 
 
 int * add(int* tab, int toadd, int size) {
-	int * tmp = malloc(sizeof(int) * size);
+	int * tmp = (int*)malloc(sizeof(int) * size);
 
 	for (int i = 0; i < size - 1; i++) {
 		tmp[i] = tab[i];
 	}
 
 	tmp[size - 1] = toadd;
+	if (tab != NULL)
+		free(tab);
 	return tmp;
 }
 
+void addInt(int ** tab, int toadd, int size) {
+	int * tmp = malloc(sizeof(int) * size);
+	for (int i = 0; i < size - 1; i++) {
+		tmp[i] = (*tab) [i];
+	}
+
+	*tab = NULL;
+
+	tmp[size - 1] = toadd;
+	(*tab) = (int*) malloc(sizeof(int) * size);
+	for (int i = 0; i < size; i++) {
+		(*tab) [i] = tmp[i];
+	}
+
+	free(tmp);
+}
+
+
 m_data * add_sol(m_data * solutions, m_data toAdd, int size) {
-	m_data * tmp = malloc(sizeof(m_data) * size);
+	m_data * tmp = (m_data *) malloc(sizeof(m_data) * size);
 
 	for (int i  = 0; i < size - 1; i++) {
 		tmp[i] = solutions[i];
 	}
 	tmp[size - 1] = toAdd;
+	if (solutions != NULL)
+		free(solutions);
+
 	return tmp;
 }
 
-
-
-m_data * add_neigh(m_data * gSol, int gSize, m_data * neigh, int nSize) {
-	m_data * tmp = malloc(sizeof(m_data) * (gSize + nSize));
-	for (int i = 0; i < gSize; i++) {
-		tmp[i] = gSol[i];
-	}
-	for (int i = 0; i < nSize; i++) {
-		tmp[i + gSize] = neigh[i];
-	}
-	free(gSol);
-	return tmp;
-}
-
-void add_neigh_global (m_data ** gSol, int * gSize, m_data * neigh, int nSize) {
-	(*gSol)= malloc(sizeof(m_data) * ((*gSize) + nSize));
-	for (int i = 0; i < (*gSize); i++) {
-		(*gSol)[i] = (*gSol)[i];
-	}	
-	for (int i = 0; i < nSize; i++) {
-		(*gSol)[i+(*gSize)] = neigh[i];
-	}
-
-	(*gSize) += nSize;
-}
-
-
-m_data * remove_sol(m_data * solutions, int size, int * toRemove, int rmsize) {
-	m_data * tmp = malloc(sizeof(m_data) * (size - rmsize));
-	int a = 0;
-
-	for (int i = 0; i < size - rmsize; i++) {
-		for (int j = 0; j < rmsize ;j++) {
-			if (isInto(a, toRemove, rmsize) == 1) {
-				a++;
-			}
-		}
-		tmp[i] = solutions[a];
-		a++;
-	}
-	return tmp;
-}
 
 m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2) {
 	m_data tmp;
@@ -114,7 +96,7 @@ m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2) {
 	tmp.cost_1 = cost[0];
 	tmp.cost_2 = cost[1];
 
-	tmp.solution = malloc(sizeof(int) * tmp.size);
+	tmp.solution = (int*)malloc(sizeof(int) * tmp.size);
 	for (int i = 0; i < tmp.size; i++)
 		tmp.solution[i] = d.solution[i];
 
@@ -134,33 +116,112 @@ m_data to_m_data(int index, m_data d, int* cost, int** mat1, int** mat2) {
 	tmp.col_2 = calculate_col(tmp.size, d.col_2, mat2, index, delta);
 
 	return tmp;
-
 }
 
-m_data init_m_data(m_data d) {
-	m_data tmp;
+m_data * add_sol2(m_data * solutions, int size, int* costs, int* sol, int* row1, int* row2, int* col1, int* col2, int matsize ) {
+	m_data * tmp = (m_data *) malloc(sizeof(m_data) * size);
 
-	tmp.size = d.size;
-	tmp.cost_1 =  d.cost_1;
-	tmp.cost_2 = d.cost_2;
+	for (int i  = 0; i < size - 1; i++) {
+		tmp[i] = solutions[i];
+	}
+	tmp[size - 1].cost_1 = costs[0];
+	tmp[size - 1].cost_2 = costs[1];
 
-	tmp.solution = malloc(sizeof(int) * tmp.size);
-	for (int i = 0; i < tmp.size; i++)
-		tmp.solution[i] = d.solution[i];
-	tmp.row_1 = malloc(sizeof(int) * tmp.size);
-	tmp.row_2 = malloc(sizeof(int) * tmp.size);
-	tmp.col_1 = malloc(sizeof(int) * tmp.size);
-	tmp.col_2 = malloc(sizeof(int) * tmp.size);
+	tmp[size - 1].size = matsize;
 
-	for (int i = 0; i < tmp.size; i++) {
-		tmp.row_1 [i] = d.row_1[i];
-		tmp.row_2 [i] = d.row_2[i];
-		tmp.col_1 [i] = d.col_1[i];
-		tmp.col_2 [i] = d.col_2[i];
+	tmp[size - 1].row_1 = malloc(sizeof(int)* matsize);
+	tmp[size - 1].row_2 = malloc(sizeof(int)* matsize);
+
+	tmp[size - 1].col_1 = malloc(sizeof(int)* matsize);
+	tmp[size - 1].col_2 = malloc(sizeof(int)* matsize);
+	tmp[size - 1].solution = malloc(sizeof(int)* matsize);
+
+	for (int i = 0; i < matsize; i++) {
+		tmp[size - 1].row_1[i] = row1[i];
+		tmp[size - 1].row_2[i] = row2[i];
+		tmp[size - 1].col_1[i] = col1[i];
+		tmp[size - 1].col_2[i] = col2[i];
+		tmp[size - 1].solution[i] = sol[i];
 	}
 
+
+	if (solutions != NULL) {
+		/*for (int i = 0; i < size - 1; i++) {
+			free(solutions[i].solution);
+			solutions[i].solution = NULL;
+			free(solutions[i].row_1);
+			solutions[i].row_1 = NULL;
+		}*/
+		free(solutions);
+		solutions = NULL;
+	}
+
+
+	return tmp;
+
+}
+
+
+
+m_data * add_neigh(m_data * gSol, int gSize, m_data * neigh, int nSize) {
+	m_data * tmp = (m_data *)malloc(sizeof(m_data) * (gSize + nSize));
+	for (int i = 0; i < gSize; i++) {
+		tmp[i] = gSol[i];
+	}
+	for (int i = 0; i < nSize; i++) {
+		tmp[i + gSize] = neigh[i];
+	}
+	if (gSol != NULL)
+		free(gSol);
 	return tmp;
 }
+
+void add_neigh2(m_data ** gSol, int gSize, m_data * neigh, int nSize) {
+	for (int i = 0; i < nSize; i++) {
+		(*gSol)[i + gSize] = neigh[i];
+	}
+}
+
+void add_neigh_global (m_data ** gSol, int * gSize, m_data * neigh, int nSize) {
+	(*gSol)=(m_data *) malloc(sizeof(m_data) * ((*gSize) + nSize));
+	for (int i = 0; i < (*gSize); i++) {
+		(*gSol)[i] = (*gSol)[i];
+	}	
+	for (int i = 0; i < nSize; i++) {
+		(*gSol)[i+(*gSize)] = neigh[i];
+	}
+
+	(*gSize) += nSize;
+}
+
+
+m_data * remove_sol(m_data * solutions, int size, int * toRemove, int rmsize) {
+	m_data * tmp = (m_data *) malloc(sizeof(m_data) * (size - rmsize));
+	int a = 0;
+
+	for (int i = 0; i < size - rmsize; i++) {
+		for (int j = 0; j < rmsize ;j++) {
+			if (isInto(a, toRemove, rmsize) == 1) {
+				a++;
+			}
+		}
+		tmp[i] = solutions[a];
+		a++;
+	}
+	if (solutions != NULL && size > 0) {
+	/*	for (int i = 0; i < size; i++) {
+			free(solutions[i].solution);
+			free(solutions[i].row_1);
+			free(solutions[i].row_2);
+			free(solutions[i].col_1);
+			free(solutions[i].col_2);
+		}*/
+		free(solutions);
+	}
+	return tmp;
+}
+
+
 
 
 /// COMPARE
@@ -174,11 +235,16 @@ int isTheSame (int * first, int * second, int size) {
 	return 1;
 }
 
-int * copy(int * sol, int size) {
-	int * tmp = malloc(sizeof(int) * size);
-	for (int i = 0; i < size; i++) {
-		tmp[i] = sol[i];
-	}
+int sameCost(int c1, int c2, int cc1, int cc2) {
+	if (c1 == cc1 && c2 == cc2)
+		return 1;
+	else
+		return 2;
+}
+
+int * copy(int const * sol, int size) {
+	int * tmp = (int*)malloc(sizeof(int) * size);
+	memcpy(tmp, sol, size * sizeof(int));
 
 	return tmp;
 }
@@ -190,27 +256,13 @@ int * copy(int * sol, int size) {
 
 void generate_random_sol(int ** tab, int size){
 	int i = 0;
-	*tab = malloc(sizeof(int) * size);
+	*tab = (int*)malloc(sizeof(int) * size);
 	for (i = 0; i < size; i++) {
 		(*tab)[i] = rand() % 2;
 	}
 }
 
 // Initial cost
-
-/*
-// debug
-int init_cost_basic(int ** mat, int size, int* sol) {
-	int tmp = 0;
-	for (int i =0; i < size; i++) {
-		for (int j = 0; j< size; j++) {
-				tmp += sol[i]* sol[j]* mat[i][j];
-		}
-	}
-	return tmp;
-}
-
-*/
 
 
 int init_cost(int ** mat, int size, int* sol) {
@@ -227,7 +279,7 @@ int init_cost(int ** mat, int size, int* sol) {
 // row and column values 
 
 void init_row_value(int ** row, int ** mat, int size, int * sol) {
-	(*row) = malloc(size*sizeof(int));
+	(*row) = (int*)malloc(size*sizeof(int));
 	int temp = 0;
 	for (int i = 0; i < size ; i++) {
 		temp = 0;
@@ -241,7 +293,7 @@ void init_row_value(int ** row, int ** mat, int size, int * sol) {
 }
 
 void init_col_value(int ** row, int ** mat, int size, int * sol) {
-	(*row) = malloc(size*sizeof(int));
+	(*row) = (int*)malloc(size*sizeof(int));
 	int temp = 0;
 	for (int j = 0; j < size ; j++) {
 		temp = 0;
@@ -269,7 +321,7 @@ int delta_index(int** mat, int* row, int* col, int * sol, int index) {
 }
 
 int* calculate_costs(m_data d, int ** mat1, int ** mat2, int index) {
-	int* temp = malloc(sizeof(int) * 2);
+	int* temp = (int*)malloc(sizeof(int) * 2);
 	// print_tab(d.row_2, 5);
 	temp[0] = d.cost_1 + delta_index(mat1, d.row_1, d.col_1, d.solution, index);
 	temp[1] = d.cost_2 + delta_index(mat2, d.row_2, d.col_2, d.solution, index);
@@ -315,6 +367,7 @@ int * calculate_col(int size, int * col, int** mat, int index, int delta) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// OK
 first_s init(char* fileName) {
 	first_s toReturn;
 
@@ -348,32 +401,30 @@ first_s init(char* fileName) {
 
 m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol, m_data* gSol, int sizeG) {
 
-	int * tmp;
+	int * tmp = NULL;
 
 	m_data data_tmp;
-	m_data * solutions;
-
+	m_data * solutions = NULL;
 
 // adds solutions
 	for (int i = 0; i < data.size; i++) {
 		tmp = calculate_costs(data, mat1, mat2, i);
 		if (tmp[0] >= data.cost_1 || tmp[1] >= data.cost_2) {
 			data_tmp = to_m_data(i, data, tmp, mat1, mat2);
+			
 			(*sizeSol)++;
 			solutions = add_sol(solutions, data_tmp, (*sizeSol));
+			//printf("second \n");
+			//print_tab(solutions[(*sizeSol)-1].solution, data.size);
+			//print_tab(solutions[(*sizeSol)-1].solution, data.size);
+
+			//free_mdata(data_tmp);
 		}
+		free(tmp);
 	}
-	free(tmp);
-/*	for (int i = 0; i < (*sizeSol); i++) {
-		printf("index i = %d \n", i);
-//		print_tab(solutions[i].solution, solutions[i].size);
-		//print_tab(solutions[i].row_1, solutions[i].size);
-		print_cost(solutions[i]);
-	}
-	*/
 
 	int rmsize = 0;
-	int * toRem;
+	int * toRem = NULL;
 
 	for (int i = 0; i < (*sizeSol); i++) {
 		for (int j = i+1; j < (*sizeSol); j++) {
@@ -394,6 +445,8 @@ m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol, m_da
 	(*sizeSol) -= rmsize;
 
 	rmsize = 0;
+	if (toRem !=NULL)
+		free(toRem);
 	toRem = NULL;
 
 	for (int i = 0; i < (*sizeSol); i++) {
@@ -410,33 +463,280 @@ m_data * neighboorhood (m_data data, int** mat1, int** mat2, int * sizeSol, m_da
 	solutions = remove_sol(solutions,(*sizeSol), toRem, rmsize);
 	(*sizeSol) -= rmsize;
 
-	free(toRem);
+	if (toRem !=NULL)
+		free(toRem);
 
 	return solutions;
 }
 
-// removes from sol
+void neighboorhood2 (m_data** solutions, m_data data, int** mat1, int** mat2, int * sizeSol, m_data* gSol, int sizeG) {
 
-void removeGlobal(m_data * neigh, int sizeN, m_data** sol, int * sizeSol) {
-	int* toRem;
+	int * tmp = NULL;
+
+	m_data data_tmp;
+	(*solutions) = malloc(sizeof(m_data) * (*sizeSol));
+
+// adds solutions
+	for (int i = 0; i < data.size; i++) {
+		tmp = calculate_costs(data, mat1, mat2, i);
+		if (tmp[0] >= data.cost_1 || tmp[1] >= data.cost_2) {
+
+			//data_tmp = to_m_data(i, data, tmp, mat1, mat2);
+			/* to m data en dur */
+			int delta = 1;
+
+			data_tmp.size = data.size;
+			data_tmp.cost_1 = tmp[0];
+			data_tmp.cost_2 = tmp[1];
+
+			data_tmp.solution = (int*)malloc(sizeof(int) * data_tmp.size);
+			for (int j = 0; j < data_tmp.size; j++)
+				data_tmp.solution[j] = data.solution[j];
+
+			if (data_tmp.solution[i] == 0 ) {
+				data_tmp.solution[i] = 1;
+				delta = 1;
+			}
+			else {
+				data_tmp.solution[i] = 0;
+				delta = -1;
+			}
+
+			data_tmp.row_1 = copy(data.row_1, data_tmp.size);
+			update_row(data_tmp.size, &data_tmp.row_1, mat1, i, delta);
+
+			data_tmp.row_2 = copy(data.row_2, data_tmp.size);
+			update_row(data_tmp.size, &data_tmp.row_2, mat2, i, delta);
+			
+			data_tmp.col_1 = copy(data.col_1, data_tmp.size);
+			update_col(data_tmp.size, &data_tmp.col_1, mat1, i, delta);
+
+			data_tmp.col_2 = copy(data.col_2, data_tmp.size);
+			update_col(data_tmp.size, &data_tmp.col_2, mat2, i, delta);
+
+
+
+
+	/////
+			
+			(*sizeSol)++;
+			(*solutions) = add_sol((*solutions), data_tmp, (*sizeSol));
+
+
+			//printf("second \n");
+			//print_tab(solutions[(*sizeSol)-1].solution, data.size);
+			//print_tab(solutions[(*sizeSol)-1].solution, data.size);
+
+			//free_mdata(data_tmp);
+		}
+		free(tmp);
+	}
+
 	int rmsize = 0;
-	// i neigh - j sol
-	for (int j = 0; j < (*sizeSol); j++) { 
-		for (int i = 0; i < sizeN; i++) {
-			if ((neigh[i].cost_1 > (*sol)[j].cost_1 && neigh[i].cost_2 > (*sol)[j].cost_2) && (isInto(j, toRem, rmsize) == 0)) {
+	int * toRem = NULL;
+
+	for (int i = 0; i < (*sizeSol); i++) {
+		for (int j = i+1; j < (*sizeSol); j++) {
+			if(((*solutions)[i].cost_1 > (*solutions)[j].cost_1 && (*solutions)[i].cost_2 >(*solutions)[j].cost_2) && (isInto(j, toRem, rmsize) == 0)){
 				rmsize++;
-				toRem = add (toRem, j, rmsize);
+				toRem = add(toRem, j, rmsize);
+			}
+			else if (((*solutions)[i].cost_1 < (*solutions)[j].cost_1 && (*solutions)[i].cost_2 < (*solutions)[j].cost_2) &&  (isInto(i, toRem, rmsize) == 0)) {
+				rmsize++;
+				toRem = add(toRem, i, rmsize);
+				break;
+			} 
+		}
+	}
+//	print_tab(toRem, rmsize);
+
+	(*solutions) = remove_sol((*solutions),(*sizeSol), toRem, rmsize);
+	(*sizeSol) -= rmsize;
+
+	rmsize = 0;
+	if (toRem !=NULL)
+		free(toRem);
+	toRem = NULL;
+
+	for (int i = 0; i < (*sizeSol); i++) {
+		for (int j = 0; j < sizeG; j++) {
+			if ((isInto(i, toRem, rmsize) == 0) ) {
+				if (isTheSame((*solutions)[i].solution, gSol[j].solution, data.size) == 1) {
+					rmsize++;
+					toRem = add(toRem, i, rmsize);
+				}
 			}
 		}
 	}
 
-	(*sol) = remove_sol((*sol), (*sizeSol), toRem, rmsize);
+	(*solutions)= remove_sol((*solutions),(*sizeSol), toRem, rmsize);
 	(*sizeSol) -= rmsize;
+
+	if (toRem !=NULL)
+		free(toRem);
 }
 
+m_data * neighboorhood3 (m_data data, int** mat1, int** mat2, int * sizeSol, m_data* gSol, int sizeG) {
+
+	int * tmp = NULL;
+	m_data * solutions = malloc(sizeof(m_data) * data.size);
+
+	int * dsol;
+	int * drow1;
+	int * drow2;
+	int * dcol1;
+	int * dcol2;
+
+// adds solutions
+	for (int i = 0; i < data.size; i++) {
+		tmp = calculate_costs(data, mat1, mat2, i);
+		if (tmp[0] >= data.cost_1 || tmp[1] >= data.cost_2) {
+
+			int delta = 1;			
+
+			dsol = (int*)malloc(sizeof(int) * data.size);
+			for (int j = 0; j < data.size; j++)
+				dsol[j] = data.solution[j];
+
+			if (dsol[i] == 0 ) {
+				dsol[i] = 1;
+				delta = 1;
+			}
+			else {
+				dsol[i] = 0;
+				delta = -1;
+			}
+
+
+			drow1 = copy(data.row_1, data.size);
+			update_row(data.size, &drow1, mat1, i, delta);
+
+			drow2 = copy(data.row_2, data.size);
+			update_row(data.size, &drow2, mat2, i, delta);
+			
+			dcol1 = copy(data.col_1, data.size);
+			update_col(data.size, &dcol1, mat1, i, delta);
+
+			dcol2 = copy(data.col_2, data.size);
+			update_col(data.size, &dcol2, mat2, i, delta);
+
+			(*sizeSol)++;
+
+		//	solutions = add_sol2(solutions, (*sizeSol), tmp, dsol, drow1, drow2, dcol1, dcol2, data.size );
+
+			if (*sizeSol <= data.size) {
+				solutions[(*sizeSol) -1].cost_1 = tmp[0];
+				solutions[(*sizeSol) -1].cost_2 = tmp[1];
+				solutions[(*sizeSol) -1].size = data.size;
+
+				solutions[(*sizeSol) -1].row_1 = malloc(sizeof(int) * data.size);
+
+				solutions[(*sizeSol) -1].row_2 = malloc(sizeof(int) * data.size);
+				solutions[(*sizeSol) -1].col_1 = malloc(sizeof(int) * data.size);
+				solutions[(*sizeSol) -1].col_2 = malloc(sizeof(int) * data.size);
+				solutions[(*sizeSol) -1].solution = malloc(sizeof(int) * data.size);
+
+				for (int i = 0; i < data.size; i++) {
+					solutions[(*sizeSol) -1].row_1[i] = drow1[i];
+					solutions[(*sizeSol) -1].row_2[i] = drow2[i];
+					solutions[(*sizeSol) -1].col_1[i] = dcol1[i];
+					solutions[(*sizeSol) -1].col_2[i] = dcol2[i];
+					solutions[(*sizeSol) -1].solution[i] = dsol[i];
+				}
+
+			}
+			else {
+				printf("size Error \n");
+			}
+
+			if (dsol != NULL) {
+				free(dsol);
+				dsol = NULL;
+			}
+			if (dcol1 != NULL)
+				free(dcol1);
+			if (dcol2 != NULL)
+				free(dcol2);
+			if (drow1 != NULL)
+				free(drow1);
+			if (drow2 != NULL)
+				free(drow2);
+		}
+		free(tmp);
+	}
+
+
+	int rmsize = 0;
+	int * toRem = NULL;
+
+	for (int i = 0; i < (*sizeSol); i++) {
+		for (int j = i+1; j < (*sizeSol); j++) {
+			if((solutions[i].cost_1 > solutions[j].cost_1 && solutions[i].cost_2 > solutions[j].cost_2) && (isInto(j, toRem, rmsize) == 0)){
+				rmsize++;
+				toRem = add(toRem, j, rmsize);
+			}
+			else if ((solutions[i].cost_1 < solutions[j].cost_1 && solutions[i].cost_2 < solutions[j].cost_2) &&  (isInto(i, toRem, rmsize) == 0)) {
+				rmsize++;
+				toRem = add(toRem, i, rmsize);
+				break;
+			} 
+		}
+		for (int j = 0; j < sizeG; j++) {
+			if ((isInto(i, toRem, rmsize) == 0) ) {
+				if (sameCost(solutions[i].cost_1, solutions[i].cost_2, gSol[j].cost_1, gSol[j].cost_2) == 1) {
+					rmsize++;
+					toRem = add(toRem, i, rmsize);
+				}
+			}
+		}
+	}
+
+//	print_tab(toRem, rmsize);
+	//solutions = remove_sol(solutions,(*sizeSol), toRem, rmsize);
+
+
+	int a = 0;
+	for (int i = 0; i < (*sizeSol) - rmsize; i++) {
+		for (int j = 0; j < rmsize ;j++) {
+			if (isInto(a, toRem, rmsize) == 1) {
+			//	printf("%d remove \n ", a);
+				a++;
+			}
+		}
+		if (i != a) {
+			solutions[i].cost_1 = solutions[a].cost_1;
+			solutions[i].cost_2 = solutions[a].cost_2;
+			for (int k = 0; k < data.size;k++) {
+				solutions[i].solution[k] = solutions[a].solution[k];
+				solutions[i].row_1[k] = solutions[a].row_1[k];
+				solutions[i].row_2[k] = solutions[a].row_2[k];
+				solutions[i].col_1[k] = solutions[a].col_1[k];
+				solutions[i].col_2[k] = solutions[a].col_2[k];
+			}
+		}
+		a++;
+	}
+
+/*	for (int i = (*sizeSol) - rmsize ; i < (*sizeSol); i++) {
+		free(solutions[i].solution);
+		//solutions[i].solution = NULL;
+		printf("%d test \n", solutions[i].solution[0]);
+	}*/
+
+	(*sizeSol) -= rmsize;
+
+
+	if (toRem !=NULL)
+		free(toRem);
+
+	return solutions;
+}
+
+
+// removes from sol
 void removeGlobal2(m_data * neigh, int sizeN, m_data** solutions, int * sizeSol) {
 	int rmsize = 0;
-	int * toRem;
+	int * toRem = NULL;
 
 	(*solutions) = add_neigh((*solutions), (*sizeSol), neigh, sizeN);
 	(*sizeSol) += sizeN;
@@ -454,8 +754,40 @@ void removeGlobal2(m_data * neigh, int sizeN, m_data** solutions, int * sizeSol)
 		}
 	}
 
-	(*solutions) = remove_sol((*solutions),(*sizeSol), toRem, rmsize);
+	//(*solutions) = remove_sol((*solutions),(*sizeSol), toRem, rmsize);
+
+	int a = 0;
+	for (int i = 0; i < (*sizeSol) - rmsize; i++) {
+		for (int j = 0; j < rmsize ;j++) {
+			if (isInto(a, toRem, rmsize) == 1) {
+			//	printf("%d remove \n ", a);
+				a++;
+			}
+		}
+		if (i != a) {
+			(*solutions)[i].cost_1 = (*solutions)[a].cost_1;
+			(*solutions)[i].cost_2 = (*solutions)[a].cost_2;
+			for (int k = 0; k < neigh[0].size ;k++) {
+				(*solutions)[i].solution[k] = (*solutions)[a].solution[k];
+				(*solutions)[i].row_1[k] = (*solutions)[a].row_1[k];
+				(*solutions)[i].row_2[k] = (*solutions)[a].row_2[k];
+				(*solutions)[i].col_1[k] = (*solutions)[a].col_1[k];
+				(*solutions)[i].col_2[k] = (*solutions)[a].col_2[k];
+			}
+		}
+		a++;
+	}
+
+	for (a = a+1; a < (*sizeSol); a++){
+		free((*solutions)[a].solution);
+	} 
+
+
 	(*sizeSol) -= rmsize;
+	
+	if(toRem != NULL) {
+		free(toRem);
+	}
 }
 
 /// free
@@ -468,9 +800,30 @@ void free_matrix(int **matrix, int size_x)
     free(matrix);
 }
 void free_mdata(m_data d) {
-	free(d.solution);
-	free(d.row_1);
-	free(d.row_2);
-	free(d.col_1);
-	free(d.col_2);
+	if (d.solution !=NULL) {
+		free(d.solution);
+		d.solution = NULL;
+	}
+
+	if (d.row_1 !=NULL)
+		free(d.row_1);
+
+	if (d.row_2 !=NULL)
+		free(d.row_2);
+
+	if (d.col_1 !=NULL)
+		free(d.col_1);
+
+	if (d.col_2 !=NULL)
+		free(d.col_2);
+}
+
+void free_tab(m_data * d, int d_size, int size) {
+
+	/*for (int i = 0; i < d_size; i++) {
+		free(d[i].solution);
+	} */ 
+	if (d!= NULL)
+		free(d);
+
 }
