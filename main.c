@@ -1,4 +1,5 @@
 #include "methods.h"
+#include "time.h"
 
 int main(int argc, char** argv) {
 
@@ -6,6 +7,18 @@ int main(int argc, char** argv) {
 	// files
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
 	char * testFileName = "res/test.dat";
+
+	clock_t begin, end;
+	double time_spent;
+	begin = clock();
+
+	global(fileName);
+
+	end = clock();
+	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	printf("EXEC TIME : %f \n", time_spent );
+
+	return 0;
 /*
 	int sizeMat = 0;	
 	int sizeSol = 0;
@@ -171,7 +184,4 @@ free_mdata(solu.dat);
 //	free(solutions[i].col_1);
 //	free(solutions[i].col_2);
 }*/
-	global(fileName);
-
-	return 0;
 }
