@@ -28,6 +28,7 @@ typedef struct first_sol {
 	m_data dat;
 } first_s;
 
+int global(char* fileName);
 
 
 void print_mat(int ** mat, int size);
@@ -49,6 +50,8 @@ m_data init_m_data(m_data d);
 void free_mdata(m_data d);
 
 int * copy(int const * sol, int size) ;
+
+int* calculate_costs_global(int cost_1, int cost_2, int* row_1, int* row_2, int* col_1, int* col_2, int* solution, int ** mat1, int ** mat2, int index) ;
 
 
 void generate_random_sol(int ** tab, int size);
@@ -91,4 +94,7 @@ void neighboorhood4 (m_data** solutions, m_data data, int** mat1, int** mat2, in
 void free_matrix(int **matrix, int size_x);
 
 void free_tab(m_data * d, int d_size, int size);
+
+void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
+
 #endif

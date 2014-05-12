@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
 	// files
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
 	char * testFileName = "res/test.dat";
-
+/*
 	int sizeMat = 0;	
 	int sizeSol = 0;
 	m_data * solutions = malloc(sizeof(m_data) * max);
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
 
 //// OTHER GLOBAL
 
-
+/*
 int number = 0;
 int oldSol = 0;
 
@@ -154,7 +154,7 @@ for (int i = 0; i < sizeSol; i++) {
 
 /*for (int i =0; i < sizeSol; i++) 
 	free(solutions[i].row_1);
-	print_tab(solutions[i].solution, 5);*/
+	print_tab(solutions[i].solution, 5);
 
 free_matrix(solu.mat1, solu.dat.size);
 free_matrix(solu.mat2, solu.dat.size);
@@ -171,6 +171,7 @@ free_mdata(solu.dat);
 //	free(solutions[i].col_1);
 //	free(solutions[i].col_2);
 }*/
+	global(fileName);
 
 	return 0;
 }
