@@ -56,6 +56,14 @@ int * copy(int const * sol, int size) {
 	return tmp;
 }
 
+int exists(int c1, int c2, int* cs1, int* cs2, int size) {
+	for (int i = 0; i < size ; i++ ) {
+		if (c1 == cs1[i] || c2 == cs2[i] )
+			return 1;
+	}
+	return 0;
+}
+
 
 ////////////////   INIT METHODS///////////////////////////////////////////////////////////////
 
@@ -141,7 +149,6 @@ int global(char* fileName) {
 /////////////// INIT////////////////////
 ////////////////////////////////////////
 	first_s solu;
-	int max = 100000;
 
 	// size + matrix
 	if (parse(fileName, &solu.dat.size, &solu.mat1, &solu.mat2) == EXIT_FAILURE) {
@@ -162,6 +169,12 @@ int global(char* fileName) {
 
 
 	int sizeSol = 0;
+	int max;
+
+	if (solu.dat.size < 100)
+		max = 50000;
+	else
+		max = solu.dat.size * 20;
 
 	int ** solutions = (int**)malloc(sizeof(int*) * max);
 	int ** rows1 = (int**)malloc(sizeof(int*) * max);
@@ -177,6 +190,7 @@ int global(char* fileName) {
 		cols1[i] = malloc(sizeof(int) * solu.dat.size);
 		cols2[i] = malloc(sizeof(int) * solu.dat.size);
 	}
+
 
 
 /// add init sol /////
@@ -206,7 +220,7 @@ int global(char* fileName) {
 	int * oldCost = malloc(sizeof(int) * 2);
 
 
-
+/*
 	while (number <  10) {
 		printf("number =  %d \n", number);
 
@@ -220,7 +234,7 @@ int global(char* fileName) {
 
 
 		for (int i = 0; i < sizeSol; i++) {
-			globalNeigh(i, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
+			globalNeigh (i, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
 
 			if (sizeSol > 100)
 				break;
@@ -235,14 +249,36 @@ int global(char* fileName) {
 	}
 
 	free(oldCost);
+*/
+	int index = 0;
+	while (sizeSol < max - (solu.dat.size + 100)) {
+		index = globalNeigh2 (index, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
+		if (index == -1)
+			index = 0;
+	}
 
+
+
+	/* remove first sols */
+	for (int i = 0; i < sizeSol / 2; i++) {
+		
+	}
+	sizeSol /= 2;
+
+	index = 0;
+	while (sizeSol < max - (solu.dat.size + 100)) {
+		index = globalNeigh2 (index, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
+		if (index == -1)
+			index = 0;
+		/* remove first sols */
+	}
 
 ////////////////// VERIFICATION /////////////////////////
 ////////////////////////////////////////////////////////
-	for (int i = 0; i < sizeSol; i++) {
+/*	for (int i = 0; i < sizeSol; i++) {
 		printf("index i = %d\ncosts : %d | %d \n",i, costs1[i], costs2[i] );
-		printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
-	}
+		//printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
+	}*/
 
 	write_res(costs1, costs2, sizeSol, fileName);
 
@@ -328,10 +364,6 @@ void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* size
 			(*sizeSol)++;
 		}
 		free(tmp);
-
-
-
-				//	printf("test \n");
 	}
 
 
@@ -365,6 +397,9 @@ void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* size
 			//	printf("%d remove \n ", a);
 				a++;
 			}
+			else {
+				break;
+			}
 		}
 		if (i != a) {
 			(*costs1)[i] = (*costs1)[a];
@@ -387,96 +422,121 @@ void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* size
 	
 }
 
-void globalNeigh2 ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */) {
+int globalNeigh2 ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */) {
 	///////////// ADDS EVERY SOLUTION WITH AN EQUIVALENT OR BETTER COST ///////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
 
 	// TODO : if with maximal size ...
+
+/////////////// REMOVES //////////
+////////////////////////////////
+/*	if ((*sizeSol) >= 2500) { 
+		int rmsize = 0;
+		int * toRem = malloc(sizeof(int) * 100000);
+		for (int i = 0; i < (*sizeSol); i++) {
+			for (int j = i +1; j < (*sizeSol); j++) {
+				if((*costs1)[i] >= (*costs1)[j] && (*costs2)[i] >= (*costs2)[j] && (isInto(j, toRem, rmsize) == 0)) {
+					toRem[rmsize] = j;
+					rmsize++;
+				}
+				else if ((*costs1)[i] <= (*costs1)[j] && (*costs2)[i] <= (*costs2)[j]&& (isInto(i, toRem, rmsize) == 0)) {
+					toRem[rmsize] = i;
+					rmsize++;
+				}
+			}
+		}
+
+		
+		int a = 0;
+		for (int i = 0; i < (*sizeSol) - rmsize; i++) {
+			for (int j = 0; j < rmsize ;j++) {
+				if (isInto(a, toRem, rmsize) == 1) {
+				//	printf("%d remove \n ", a);
+					a++;
+				}
+			}
+			if (i != a) {
+				(*costs1)[i] = (*costs1)[a];
+				(*costs2)[i] = (*costs2)[a];
+				for (int k = 0; k < size;k++) {
+					(*sol)[i][k] = (*sol)[a][k];
+					(*rows1)[i][k] = (*rows1)[a][k];
+					(*rows2)[i][k] = (*rows2)[a][k];
+					(*cols1)[i][k] = (*cols1)[a][k];
+					(*cols2)[i][k] = (*cols2)[a][k];
+				}
+			}
+			a++;
+		}
+
+		(*sizeSol) -= rmsize;
+
+		if (toRem !=NULL)
+			free(toRem);	
+
+		return rmsize;
+	}*/
+	int toReturn = -1;
+	int * old = malloc(sizeof(int) * 2);
+	old[0] = -100000000;
+	old[1] = -100000000;
 
 	int * tmp = NULL;
 	for (int i = 0; i < size; i++) {
 		tmp = calculate_costs_global((*costs1)[currentSol], (*costs2)[currentSol], (*rows1)[currentSol], (*rows2)[currentSol], (*cols1)[currentSol],
 		(*cols2)[currentSol], (*sol)[currentSol], mat1, mat2, i);
 
-		if(tmp[0] >= (*costs1)[currentSol] || tmp[1] >= (*costs2)[currentSol]) {
-			int delta = 1;
+		if (exists(tmp[0], tmp[1], (*costs1), (*costs2), size) == 0){
 
-			// fill
-			// delta
-			if ((*sol)[currentSol][i] == 0 ) {
-				(*sol)[(*sizeSol)][i] = 1;
-				delta = 1;
-			}
-			else {
-				(*sol)[(*sizeSol)][i] = 0;
-				delta = -1;
-			}
+			if(tmp[0] >= (*costs1)[currentSol] || tmp[1] >= (*costs2)[currentSol]) {
+				
 
-
-			for (int j = 0; j < size; j++) {
-				if (j != i) {
-					(*sol)[(*sizeSol)][j] = (*sol)[currentSol][j];
-					(*rows1)[(*sizeSol)][j] = (*rows1)[currentSol][j] + mat1[j][i] * delta;
-					(*rows2)[(*sizeSol)][j] = (*rows2)[currentSol][j] + mat2[j][i] * delta;
-					(*cols1)[(*sizeSol)][j] = (*cols1)[currentSol][j] + mat1[i][j] * delta;
-					(*cols2)[(*sizeSol)][j] = (*cols2)[currentSol][j] + mat2[i][j] * delta;
+				if (tmp[0] > old[0] && tmp[1] > old[1]) {
+					toReturn = (*sizeSol);
+					old[0] = tmp[0] ;
+					old[1] = tmp[1];
 				}
-			}
-			(*costs1)[(*sizeSol)] = tmp[0];
-			(*costs2) [(*sizeSol)] = tmp[1];
+				int delta = 1;
 
-			(*sizeSol)++;
+				// fill
+				// delta
+				if ((*sol)[currentSol][i] == 0 ) {
+					(*sol)[(*sizeSol)][i] = 1;
+					delta = 1;
+				}
+				else {
+					(*sol)[(*sizeSol)][i] = 0;
+					delta = -1;
+				}
+
+
+				for (int j = 0; j < size; j++) {
+					if (j != i) {
+						(*sol)[(*sizeSol)][j] = (*sol)[currentSol][j];
+						(*rows1)[(*sizeSol)][j] = (*rows1)[currentSol][j] + mat1[j][i] * delta;
+						(*rows2)[(*sizeSol)][j] = (*rows2)[currentSol][j] + mat2[j][i] * delta;
+						(*cols1)[(*sizeSol)][j] = (*cols1)[currentSol][j] + mat1[i][j] * delta;
+						(*cols2)[(*sizeSol)][j] = (*cols2)[currentSol][j] + mat2[i][j] * delta;
+					}
+					else {
+						(*rows1)[(*sizeSol)][j] = (*rows1)[currentSol][j];
+						(*rows2)[(*sizeSol)][j] = (*rows2)[currentSol][j];
+						(*cols1)[(*sizeSol)][j] = (*cols1)[currentSol][j];
+						(*cols2)[(*sizeSol)][j] = (*cols2)[currentSol][j];
+					}
+				}
+				(*costs1)[(*sizeSol)] = tmp[0];
+				(*costs2) [(*sizeSol)] = tmp[1];
+
+				(*sizeSol)++;
+			}
 		}
+
 		free(tmp);
 	}
 
-
-/////////////// REMOVES //////////
-////////////////////////////////
-
-	int rmsize = 0;
-	int * toRem = malloc(sizeof(int) * 1000);
-
-	for (int i = 0; i < (*sizeSol); i++) {
-		for (int j = i +1; j < (*sizeSol); j++) {
-			if((*costs1)[i] >= (*costs1)[j] && (*costs2)[i] >= (*costs2)[j] && (isInto(j, toRem, rmsize) == 0)) {
-				toRem[rmsize] = j;
-				rmsize++;
-			}
-			else if ((*costs1)[i] <= (*costs1)[j] && (*costs2)[i] <= (*costs2)[j]&& (isInto(i, toRem, rmsize) == 0)) {
-				toRem[rmsize] = i;
-				rmsize++;
-			}
-		}
-	}
-
-	
-	int a = 0;
-	for (int i = 0; i < (*sizeSol) - rmsize; i++) {
-		for (int j = 0; j < rmsize ;j++) {
-			if (isInto(a, toRem, rmsize) == 1) {
-			//	printf("%d remove \n ", a);
-				a++;
-			}
-		}
-		if (i != a) {
-			(*costs1)[i] = (*costs1)[a];
-			(*costs2)[i] = (*costs2)[a];
-			for (int k = 0; k < size;k++) {
-				(*sol)[i][k] = (*sol)[a][k];
-				(*rows1)[i][k] = (*rows1)[a][k];
-				(*rows2)[i][k] = (*rows2)[a][k];
-				(*cols1)[i][k] = (*cols1)[a][k];
-				(*cols2)[i][k] = (*cols2)[a][k];
-			}
-		}
-		a++;
-	}
-
-	(*sizeSol) -= rmsize;
-
-	if (toRem !=NULL)
-		free(toRem);	
+	free(old);
+	return toReturn;
 }
 
 void write_res(int * costs1, int * costs2, int size, char* fileName) {

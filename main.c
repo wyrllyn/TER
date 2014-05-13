@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
 	double time_spent;
 	begin = clock();
 
-	global(fileName);
+	global(testFileName);
 
 	end = clock();
 	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
