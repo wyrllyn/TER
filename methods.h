@@ -70,7 +70,8 @@ void free_matrix(int **matrix, int size_x);
 void free_tab(m_data * d, int d_size, int size);
 
 void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
+void globalNeigh2 (int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
 
-void write_res(int * costs1, int * costs2, int size);
+void write_res(int * costs1, int * costs2, int size, char* fileName);
 
 #endif
