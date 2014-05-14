@@ -29,6 +29,8 @@ typedef struct first_sol {
 } first_s;
 
 int global(char* fileName);
+int global2(char* fileName);
+int global3(char* fileName);
 
 
 void print_mat(int ** mat, int size);
@@ -71,6 +73,7 @@ void free_tab(m_data * d, int d_size, int size);
 
 void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
 int globalNeigh2 (int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
+int globalNeigh3 ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 );
 
 void write_res(int * costs1, int * costs2, int size, char* fileName);
 
