@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
+#include <string.h>
+#include <time.h>
 
 
 
@@ -31,6 +33,8 @@ typedef struct first_sol {
 int global(char* fileName);
 int global2(char* fileName);
 int global3(char* fileName);
+
+int global4(char* fileName);
 
 
 void print_mat(int ** mat, int size);

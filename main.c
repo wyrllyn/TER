@@ -1,18 +1,29 @@
 #include "methods.h"
-#include "time.h"
+
 
 int main(int argc, char** argv) {
 
 	int max = 50000;
 	// files
+
+	char* fileName3 = "res/mubqp_-0.2_2_2000_0.8_0.dat";
+	char* fileName5 = "res/mubqp_0.5_2_4000_0.8_0.dat";
+
 	char * fileName = "res/mubqp_0.0_2_1000_0.4_0.dat";
+	char* fileName2 = "res/mubqp_0.0_2_1000_1.0_0.dat";	
+
+	
+	char* fileName7 = "res/mubqp_0.9_2_1000_0.8_0.dat";
+	char* fileName8 ="res/mubqp_0.9_2_1000_1.0_0.dat";
+	char* fileName9 ="res/mubqp_-0.5_2_1000_0.8_0.dat";
+	char* fileName10 = "res/mubqp_-0.9_2_1000_0.4_0.dat";
 	char * testFileName = "res/test.dat";
 
 	clock_t begin, end;
 	double time_spent;
 	begin = clock();
 
-	global3(fileName);
+	global4(fileName10);
 
 	end = clock();
 	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

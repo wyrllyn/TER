@@ -1,5 +1,5 @@
 #include "methods.h"
-#include <string.h>
+
 
 
 // print methods ///////////////////////////////////////////////////
@@ -71,6 +71,7 @@ int exists(int c1, int c2, int* cs1, int* cs2, int size) {
 
 void generate_random_sol(int ** tab, int size){
 	int i = 0;
+	//srand(time(NULL));
 	*tab = (int*)malloc(sizeof(int) * size);
 	for (i = 0; i < size; i++) {
 		(*tab)[i] = rand() % 2;
@@ -559,13 +560,146 @@ int global3(char* fileName) {
 
 }
 
+int global4(char* fileName) {
+
+/////////////// INIT////////////////////
+////////////////////////////////////////
+	first_s solu;
+
+	// size + matrix
+	if (parse(fileName, &solu.dat.size, &solu.mat1, &solu.mat2) == EXIT_FAILURE) {
+		return EXIT_FAILURE;
+	}
+
+	// solution
+	generate_random_sol(&solu.dat.solution, solu.dat.size );
+
+	//costs
+	solu.dat.cost_1 = init_cost(solu.mat1, solu.dat.size, solu.dat.solution);
+	solu.dat.cost_2 = init_cost(solu.mat2, solu.dat.size, solu.dat.solution);
+	//row and col
+	init_row_value(&solu.dat.row_1, solu.mat1, solu.dat.size, solu.dat.solution);
+	init_row_value(&solu.dat.row_2, solu.mat2, solu.dat.size, solu.dat.solution);
+	init_col_value(&solu.dat.col_1, solu.mat1, solu.dat.size, solu.dat.solution);
+	init_col_value(&solu.dat.col_2, solu.mat2, solu.dat.size, solu.dat.solution);
+
+
+	int sizeSol = 0;
+	int max;
+
+	if (solu.dat.size < 100)
+		max = 50000;
+	else
+		max = solu.dat.size * 20;
+
+	int ** solutions = (int**)malloc(sizeof(int*) * max);
+	int ** rows1 = (int**)malloc(sizeof(int*) * max);
+	int ** rows2 = (int**)malloc(sizeof(int*) * max);
+	int ** cols1 = (int**)malloc(sizeof(int*) * max);
+	int ** cols2 = (int**)malloc(sizeof(int*) * max);
+	int* costs1 = (int*)malloc(sizeof(int) * max);
+	int* costs2 = (int*)malloc(sizeof(int) * max);
+	for (int i = 0; i < max; i++) {
+		solutions[i] = malloc(sizeof(int) * solu.dat.size);
+		rows1[i] = malloc(sizeof(int) * solu.dat.size);
+		rows2[i] = malloc(sizeof(int) * solu.dat.size);
+		cols1[i] = malloc(sizeof(int) * solu.dat.size);
+		cols2[i] = malloc(sizeof(int) * solu.dat.size);
+	}
+
+
+
+/// add init sol /////
+//////////////////////
+
+	for (int i = 0; i < solu.dat.size; i++) {
+		solutions[0][i] = solu.dat.solution[i];
+		rows1 [0][i] = solu.dat.row_1[i];
+		rows2 [0][i] = solu.dat.row_2[i];
+		cols1 [0][i] = solu.dat.col_1[i];
+		cols2 [0][i] = solu.dat.col_2[i];
+	}
+	costs1[0] = solu.dat.cost_1;
+	costs2[0] = solu.dat.cost_2;
+
+	sizeSol++;
+
+	printf(" INIT COST %d %d \n", costs1[0], costs2[0]);
+
+
+///// Global loop ////////////
+//////////////////////////////
+
+
+	int number = 0;
+	int oldSol = 0;
+	int * oldCost = malloc(sizeof(int) * 2);
+
+
+	int ind = 0;
+	while ((number <  1500) && (sizeSol <= (max - 2000))) {
+		printf("number =  %d \n", number);
+
+		oldSol = sizeSol;
+		if (sizeSol > 0) {
+			oldCost[0] = costs1[sizeSol - 1];
+			oldCost[1] = costs2[sizeSol - 1];
+		}
+///////////////////////////////NEIGH////////////////////
+//////////////////////////////////////////////////////
+
+
+
+
+		srand(time(NULL));
+		ind = rand() % sizeSol;
+		globalNeigh (ind, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
+
+	
+		number++;
+	}
+
+	free(oldCost);
+
+
+	/*for (int i = 0; i < sizeSol; i++) {
+		printf("index i = %d\ncosts : %d | %d \n",i, costs1[i], costs2[i] );
+		printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
+	}*/
+
+
+	write_res(costs1, costs2, sizeSol, fileName);
+
+
+
+/////////////////////////FREE////////////////////////////
+////////////////////////////////////////////////////////
+	free_matrix(solutions, max);
+	free_matrix(rows1,  max);
+	free_matrix(rows2,  max);
+	free_matrix(cols1,  max);
+	free_matrix(cols2,  max);
+	free(costs1);
+	free(costs2);
+	free_matrix(solu.mat1, solu.dat.size);
+	free_matrix(solu.mat2, solu.dat.size);
+	free(solu.dat.row_1);
+	free(solu.dat.row_2);
+	free(solu.dat.col_2);
+	free(solu.dat.col_1);
+	free(solu.dat.solution);
+
+	return EXIT_SUCCESS;
+
+}
+
 void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */) {
 	///////////// ADDS EVERY SOLUTION WITH AN EQUIVALENT OR BETTER COST ///////////////////
 	///////////////////////////////////////////////////////////////////////////////////////
 
 	// TODO : if with maximal size ...
 
-
+	int old = (*sizeSol);
 	int * tmp = NULL;
 
 
@@ -628,7 +762,7 @@ void globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* size
 //// idea : write with the j and the i how to set the a
 
 	int rmsize = 0;
-	int * toRem = malloc(sizeof(int) * 1000);
+	int * toRem = malloc(sizeof(int) * 10000);
 
 	for (int i = 0; i < (*sizeSol); i++) {
 		for (int j = i +1; j < (*sizeSol); j++) {
