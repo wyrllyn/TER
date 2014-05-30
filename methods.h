@@ -30,10 +30,9 @@ typedef struct first_sol {
 	m_data dat;
 } first_s;
 
-int global(char* fileName);
-int global2(char* fileName);
-int global3(char* fileName);
 
+int global_hypervolume(char* fileName);
+int global3(char* fileName);
 int global4(char* fileName);
 
 
@@ -56,6 +55,8 @@ int * copy(int const * sol, int size) ;
 
 int* calculate_costs_global(int cost_1, int cost_2, int* row_1, int* row_2, int* col_1, int* col_2, int* solution, int ** mat1, int ** mat2, int index) ;
 
+void row_value(int ** row, int ** mat, int size, int * sol);
+void col_value(int ** row, int ** mat, int size, int * sol);
 
 void generate_random_sol(int ** tab, int size);
 void init_row_value(int ** row, int ** mat, int size, int * sol);

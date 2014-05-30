@@ -17,11 +17,14 @@ int main(int argc, char** argv) {
 
 	char * testFileName = "res/test.dat";
 
+
+
 	clock_t begin, end;
 	double time_spent;
 	begin = clock();
 
-	global4(fileName3);
+	//global4(fileName3);
+	global_hypervolume(fileName3);
 
 	end = clock();
 	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

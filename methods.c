@@ -126,8 +126,35 @@ void init_row_value(int ** row, int ** mat, int size, int * sol) {
 
 }
 
+void row_value(int ** row, int ** mat, int size, int * sol) {
+	//(*row) = (int*)malloc(size*sizeof(int));
+	int temp = 0;
+	for (int i = 0; i < size ; i++) {
+		temp = 0;
+		for (int j =0; j < size; j++) {
+			if (i != j)
+				temp += mat[i][j] * sol[j];
+		}
+		(*row)[i] = temp;
+	}
+
+}
+
 void init_col_value(int ** row, int ** mat, int size, int * sol) {
 	(*row) = (int*)malloc(size*sizeof(int));
+	int temp = 0;
+	for (int j = 0; j < size ; j++) {
+		temp = 0;
+		for (int i =0; i < size; i++) {
+			if (i != j)
+				temp += mat[i][j] * sol[i];
+		}
+		(*row)[j] = temp;
+	}
+}
+
+void col_value(int ** row, int ** mat, int size, int * sol) {
+	//(*row) = (int*)malloc(size*sizeof(int));
 	int temp = 0;
 	for (int j = 0; j < size ; j++) {
 		temp = 0;
@@ -163,8 +190,7 @@ int* calculate_costs_global(int cost_1, int cost_2, int* row_1, int* row_2, int*
 	return temp;
 }
 
-int global(char* fileName) {
-
+int global_hypervolume(char* fileName){
 /////////////// INIT////////////////////
 ////////////////////////////////////////
 	first_s solu;
@@ -174,150 +200,534 @@ int global(char* fileName) {
 		return EXIT_FAILURE;
 	}
 
-	// solution
-	generate_random_sol(&solu.dat.solution, solu.dat.size );
-
-	//costs
-	solu.dat.cost_1 = init_cost(solu.mat1, solu.dat.size, solu.dat.solution);
-	solu.dat.cost_2 = init_cost(solu.mat2, solu.dat.size, solu.dat.solution);
-	//row and col
-	init_row_value(&solu.dat.row_1, solu.mat1, solu.dat.size, solu.dat.solution);
-	init_row_value(&solu.dat.row_2, solu.mat2, solu.dat.size, solu.dat.solution);
-	init_col_value(&solu.dat.col_1, solu.mat1, solu.dat.size, solu.dat.solution);
-	init_col_value(&solu.dat.col_2, solu.mat2, solu.dat.size, solu.dat.solution);
-
-
 	int sizeSol = 0;
-	int max;
-
-	if (solu.dat.size < 100)
-		max = 50000;
-	else
-		max = solu.dat.size * 50;
+	int sizeMark = 0;
+	int max = 11;
 
 	int ** solutions = (int**)malloc(sizeof(int*) * max);
 	int ** rows1 = (int**)malloc(sizeof(int*) * max);
 	int ** rows2 = (int**)malloc(sizeof(int*) * max);
 	int ** cols1 = (int**)malloc(sizeof(int*) * max);
 	int ** cols2 = (int**)malloc(sizeof(int*) * max);
+	int** mark = (int**)malloc(sizeof(int*) * max);
 	int* costs1 = (int*)malloc(sizeof(int) * max);
 	int* costs2 = (int*)malloc(sizeof(int) * max);
+
 	for (int i = 0; i < max; i++) {
 		solutions[i] = malloc(sizeof(int) * solu.dat.size);
 		rows1[i] = malloc(sizeof(int) * solu.dat.size);
 		rows2[i] = malloc(sizeof(int) * solu.dat.size);
 		cols1[i] = malloc(sizeof(int) * solu.dat.size);
 		cols2[i] = malloc(sizeof(int) * solu.dat.size);
+		mark[i] = malloc(sizeof(int) * 2);
 	}
 
+	solu.dat.solution = malloc(sizeof(int)*solu.dat.size);
 
+/////// FIRST PARETO ///////////
+////////////////////////////////
+	for (int k = 0; k < max - 1; k++) {
+		int indicator = 0;
+		while (indicator != 1) {
 
-/// add init sol /////
-//////////////////////
-
-	for (int i = 0; i < solu.dat.size; i++) {
-		solutions[0][i] = solu.dat.solution[i];
-		rows1 [0][i] = solu.dat.row_1[i];
-		rows2 [0][i] = solu.dat.row_2[i];
-		cols1 [0][i] = solu.dat.col_1[i];
-		cols2 [0][i] = solu.dat.col_2[i];
-	}
-	costs1[0] = solu.dat.cost_1;
-	costs2[0] = solu.dat.cost_2;
-
-	sizeSol++;
-
-	printf(" INIT COST %d %d \n", costs1[0], costs2[0]);
-
-
-///// Global loop ////////////
-//////////////////////////////
-
-
-	int number = 0;
-	int oldSol = 0;
-	int * oldCost = malloc(sizeof(int) * 2);
-
-
-/*
-	while (number <  10) {
-		printf("number =  %d \n", number);
-
-		oldSol = sizeSol;
-		if (sizeSol > 0) {
-			oldCost[0] = costs1[sizeSol - 1];
-			oldCost[1] = costs2[sizeSol - 1];
+		
+		for (int m = 0; m < solu.dat.size; m++) {
+			//srand(time(NULL));
+			solu.dat.solution[m] = rand() % 2;
 		}
-///////////////////////////////NEIGH////////////////////
-//////////////////////////////////////////////////////
 
+		//costs
+			solu.dat.cost_1 = init_cost(solu.mat1, solu.dat.size, solu.dat.solution);
+			solu.dat.cost_2 = init_cost(solu.mat2, solu.dat.size, solu.dat.solution);
+			int ok = 1;
+			for (int j = 0; j < max; j++){
+				if ((solu.dat.cost_1 >= costs1[j] && solu.dat.cost_2 >= costs2[j]) || (solu.dat.cost_1 <= costs1[j] && solu.dat.cost_2 <= costs2[j])) {
+					ok = 0;
+					break;
+				}
+				
+			}
+			if (ok == 1){
+				indicator= 1;
+			}
+		}
+		for (int i = 0; i < solu.dat.size; i++) {
+			solutions[k][i] = solu.dat.solution[i];
+		}
+		costs1[k] = solu.dat.cost_1;
+		costs2[k] = solu.dat.cost_2;
+
+		sizeSol++;
+
+	//	printf(" INIT COST %d is : %d %d \n",k, costs1[k], costs2[k]);
+
+	//	printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[k]), init_cost(solu.mat2, solu.dat.size, solutions[k]) );
+	}
+
+////////// SORT SOLUTIONS (first cost is used)//////
+	////////////////////////////////////////////////////
+
+	int* tmpSol = malloc(sizeof(int) * solu.dat.size);
+	int tmpC1;
+	int tmpC2;
+	int index;
+
+	for (int i = 0; i < sizeSol - 1; i++){
+		tmpC1 = costs1[i];
+		index = i;
+		for (int j = i + 1; j < sizeSol; j++) {
+			if (costs1[j] < tmpC1) {
+				tmpC1 = costs1[j];
+				index = j;
+			}
+
+		}
+		if (index != i) {
+			for (int k = 0; k < solu.dat.size; k++){
+				tmpSol[k] = solutions[index][k];
+			}
+			tmpC2 = costs2[index];
+			for (int k = 0; k < solu.dat.size; k++) {
+				solutions[index][k] = solutions[i][k];
+				solutions[i][k] = tmpSol[k];
+			}
+			costs1[index] = costs1[i];
+			costs2[index] = costs2[i];
+			costs1[i] = tmpC1;
+			costs2[i] = tmpC2;
+		}
+	}
+
+	free(tmpSol);
+
+	for (int i = 0; i < sizeSol; i++) {
+			row_value(&rows1[i], solu.mat1, solu.dat.size, solutions[i]);
+			row_value(&rows2[i], solu.mat2, solu.dat.size, solutions[i]);
+			col_value(&cols1[i], solu.mat1, solu.dat.size, solutions[i]);
+			col_value(&cols2[i], solu.mat2, solu.dat.size, solutions[i]);
+	}
+///////////////////////INIT HYPERVOLUME///////////////////
+///////////////////////////////////////////////////////
+
+	// Zref
+	int x = -25000 ;
+	int y = -25000;
+	int hVol = 0;
+
+	int* associatedHvol = malloc(sizeof(int) * max);
+	int fX = 0;
+	int fY = 0;
+
+	if (costs1[0] < x || costs2[sizeSol - 1] < y) {
+		printf("FAILURE WITH ZREF VALUES \n ");
+		return EXIT_FAILURE;
+	}
+
+	for (int i = 0; i < sizeSol; i++ ){
+	//	printf("i = %d\n", i);
+		if (i == 0){
+			fX = x;
+			fY = costs2[1];
+
+		}
+		else if (i == sizeSol - 1) {
+			fX = costs1[i-1];
+			fY = y;
+		}
+		else {
+			fX = costs1[i - 1];
+			fY = costs2[i + 1];
+		}
+		associatedHvol[i] = (costs1[i] - fX) * (costs2[i] - fY);
+		printf("i %d AHV %d 1 cost %d\n",i, associatedHvol[i], costs1[i]);
+		// TODO HVOL with fX fY and current (just add)
+		hVol += (costs1[i] - fX)*(costs2[i] - y);
+	}
+
+///////////////////////////PRINCIPAL LOOP////////////////
+/////////////////////////////////////////////////////////
+
+
+	int * dominated = malloc(sizeof(int) * sizeSol);
+	int sizeD = 0;
+	int* tmp;
+
+
+	while (sizeMark != sizeSol) {
+
+	// every solutions
+			/////dominated list//////////////////
+			sizeD = 0;
+			for (int j = 0; j < sizeSol - 1; j++){
+				for (int k = j+1; k < sizeSol; k++){
+					if (costs1[j] < costs1[k] && costs2[j] < costs2[k]){
+						dominated[sizeD] = j;
+						sizeD++;
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < sizeSol; i++) {
+		
+			//	printf("i = %d\n",i );
+				int ok = 0;
+				int ind = -1;
+				int toRem = -1;
+				int tempRemValue = -1;
+				//// neigh generation//////////////////////////////
+				for (int index = 0; index < solu.dat.size; index++) {
+				//	printf("index = %d\n",index );
+					tmp = calculate_costs_global(costs1[i], costs2[i], rows1[i], rows2[i], cols1[i],
+						cols2[i], solutions[i], solu.mat1, solu.mat2, index);
+
+					//printf("what the heck \n");
+					if (isIntoSol(tmp[0], tmp[1], costs1, costs2,sizeSol) == 1){
+						//printf("CONTINUE\n");
+						continue;
+					}
+
+				//	printf("before big if \n");
+
+					///// if no dominated sols///////
+					if (sizeD == 0 ){
+					//	printf("GO\n");
+						int test = 0;
+						for (int k = 0; k < sizeSol; k++) {
+							if (tmp[0] <= costs1[k] && tmp[1] <= costs2[k]){
+								test = 1;
+								break;
+							}
+						}
+
+
+
+						///// if new sol non dominated by his "generator"///////////////
+						if (test == 0) {
+						//	printf("GO NUMBER 2\n");
+							ind = 0;
+							/////// add it //////////////////
+							for (int a = 0; a < sizeSol; a++) {
+								if (tmp[0] > costs1[a]){
+									ind = a ;
+								}
+								else {
+									break;
+								}
+							}
+							ind++;
+							int valueOfI = i;
+							for (int a = max - 1 ; a > ind; a--) {
+								costs1[a] = costs1[a - 1];
+								costs2[a] = costs2[a - 1];
+								for(int f = 0; f < solu.dat.size; f++){
+									solutions[a][f] = solutions[a-1][f];
+								}
+								if (a-1 == i){
+									valueOfI = a;
+								}
+							}
+							sizeSol++;
+							costs1[ind] = tmp[0];
+							costs2[ind] = tmp[1];
+							for(int f = 0; f < solu.dat.size; f++){
+									solutions[ind][f] = solutions[valueOfI][f];
+							}
+
+							if (solutions[valueOfI][index] == 0) {
+								solutions[ind][index] = 1;
+							}
+							else {
+								solutions[ind][index] = 0;
+							}
+
+							//printf("new Sol is at index %d \n", ind);
+
+							if (costs1[ind] != init_cost(solu.mat1, solu.dat.size, solutions[ind]) || costs2[ind] != init_cost(solu.mat2, solu.dat.size, solutions[ind]) ) {
+								printf("ERROR WITH COSTS 1\n");
+								return EXIT_FAILURE;
+							}
+
+							/////// check if new is dominant  ///////////////
+							int dominant = 0;
+							sizeD = 0;
+							for (int a = 0; a < sizeSol; a++){
+								if (costs2[ind] > costs2[a] && costs1[ind] > costs2[a]) {
+									dominated[sizeD] = a;
+									sizeD++;
+									dominant = 1;								
+								}
+							}
+
+
+
+							if (dominant == 0) {
+								// calculate hVol
+								for (int a = 0; a < sizeSol; a++ ){
+
+									if (a == 0){
+										fX = x;
+										fY = costs2[1];
+
+									}
+									else if (a == sizeSol - 1) {
+										fX = costs1[a-1];
+										fY = y;
+									}
+									else {
+										fX = costs1[a - 1];
+										fY = costs2[a + 1];
+									}
+									associatedHvol[a] = (costs1[a] - fX) * (costs2[a] - fY);
+								}
+								// picks the lowest
+								tempRemValue = associatedHvol[0];
+								toRem = 0;
+								for (int a = 1; a < max; a++) {
+									if (associatedHvol[a] < tempRemValue) {
+										toRem = a;
+										tempRemValue = associatedHvol[a];
+									}
+								}
+								if (toRem != ind) {
+									ok = 1;
+								}
+							}
+							else {
+								///// TEMPORAIRE ///////////////////////
+								toRem = dominated[0];
+								for (int a = 0; a < sizeD; a++){
+									if (costs1[toRem] > costs1[dominated[a]] && costs2[toRem] > costs2[dominated[a]]) {
+										toRem = dominated[a];
+									}
+								}
+								ok = 1;							
+							}
+						}
+						else {
+							toRem = -1;
+						}
+					}
+
+					// TO CONTINUE
+
+					// if there are dominated sols
+					else {
+					//	printf("TODO \n");
+					//	printf("here 2 \n");
+
+						ind = 0;
+
+							/////// add it //////////////////
+							for (int a = 0; a < sizeSol; a++) {
+								if (tmp[0] > costs1[a]){
+									ind = a ;
+								}
+								else {
+									break;
+								}
+							}
+							ind++;
+							int valueOfI = i;
+							for (int a = max - 1 ; a > ind; a--) {
+								costs1[a] = costs1[a - 1];
+								costs2[a] = costs2[a - 1];
+								for(int f = 0; f < solu.dat.size; f++){
+									solutions[a][f] = solutions[a-1][f];
+								}
+								if (a-1 == i){
+									valueOfI = a;
+								}
+							}
+							sizeSol++;
+							costs1[ind] = tmp[0];
+							costs2[ind] = tmp[1];
+
+
+							//printf("new Sol is at index %d \n", ind);
+
+							for(int f = 0; f < solu.dat.size; f++){
+									solutions[ind][f] = solutions[valueOfI][f];
+							}
+
+							if (solutions[valueOfI][index] == 0) {
+								solutions[ind][index] = 1;
+								//printf("IF \n");
+							}
+							else {
+								solutions[ind][index] = 0;
+								//printf("ELSE \n");
+							}
+
+							if (costs1[ind] != init_cost(solu.mat1, solu.dat.size, solutions[ind]) || costs2[ind] != init_cost(solu.mat2, solu.dat.size, solutions[ind]) ) {
+								printf("ERROR WITH COSTS 2\n");
+								return EXIT_FAILURE;
+							}
+
+
+							// update dominated and check if new if dominated
+							sizeD = 0;
+							int isInto = 0;
+							for (int j = 0; j < sizeSol - 1; j++){
+								for (int k = j+1; k < sizeSol; k++){
+									if (costs1[j] < costs1[k] && costs2[j] < costs2[k]){
+										dominated[sizeD] = j;
+										sizeD++;
+										if (j == ind){
+											isInto = 1;
+										}
+										break;
+									}
+								}
+							}
+
+							if (isInto == 0) {
+								ok = 1;
+							}
+
+							///// TODO: determine which one is to remove HERE (only among dominated)
+
+							///// temp (remove later) 
+								toRem = dominated[0];
+								for (int a = 0; a < sizeD; a++){
+									if (costs1[toRem] > costs1[dominated[a]] && costs2[toRem] > costs2[dominated[a]]) {
+										toRem = dominated[a];
+									}
+								}
+						
+
+						//check if new solution is dominated => if not remove one of the dominated
+						// else remove one of the dominated or, the solution
+
+							if (toRem != ind) {
+								ok = 1;
+							}
+	
+					}
+
+
+					//free tmp somewhere
+					free(tmp);
+
+					if (toRem != -1) {
+					// remove toRem
+						//printf("removed sol is at index %d \n", toRem);
+						for (int j = toRem; j < sizeSol - 1; j++) {
+							costs1[j] = costs1[j+1];
+							costs2[j] = costs2[j+1];
+							for (int k = 0; k < solu.dat.size; k++) {
+								solutions[j][k] = solutions[j+1][k];
+							}
+						}
+
+						sizeSol--;
+
+						for (int j = 0; j < sizeSol; j++) {
+							row_value(&rows1[j], solu.mat1, solu.dat.size, solutions[j]);
+							row_value(&rows2[j], solu.mat2, solu.dat.size, solutions[j]);
+							col_value(&cols1[j], solu.mat1, solu.dat.size, solutions[j]);
+							col_value(&cols2[j], solu.mat2, solu.dat.size, solutions[j]);
+						}
+
+						// update hVol
+
+						hVol = 0;
+						if (costs1[0] < x || costs2[sizeSol - 1] < y) {
+							printf("FAILURE WITH ZREF VALUES \n ");
+							return EXIT_FAILURE;
+						}
+
+						x = -25000;
+						y = -25000;
+
+						for (int ir = 0; ir < sizeSol; ir++ ){
+							if (ir == 0){
+								fX = x;
+								fY = costs2[1];
+
+							}
+							else if (ir == sizeSol - 1) {
+								fX = costs1[ir-1];
+								fY = y;
+							}
+							else {
+								fX = costs1[ir - 1];
+								fY = costs2[ir + 1];
+							}
+							associatedHvol[ir] = (costs1[ir] - fX) * (costs2[ir] - fY);
+							hVol += (costs1[ir] - fX)*(costs2[ir] - y);
+						}
+					}
+
+			/*					for (int gr = 0; gr < sizeSol; gr++) {
+					printf("index gr = %d\ncosts : %d | %d \n",gr, costs1[gr], costs2[gr] );	
+					printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[gr]), init_cost(solu.mat2, solu.dat.size, solutions[gr]) );
+				}*/
+
+					if (ok == 1){
+					//	printf("########################################################## \n");
+							break;
+					}
+
+					printf("i = %d index = %d\n", i, index);
+
+
+
+				}
+
+
+				//somewhere => if removed and into mark => remove from mark
+				for (int j = 0; j < sizeMark; j++) {
+					int isGood = 0;
+					for (int k = 0; k < sizeSol; k++) {
+						if (costs1[k] == mark[j][0]){
+							isGood = 1;
+							break;
+						}
+					}
+					if (!isGood) {
+						for (int a = j; a < sizeMark - 1; a++) {
+							mark[a][0] = mark[a+1][0];
+							mark[a][1] = mark[a+1][1];
+						}
+						sizeMark--;
+					}
+				}
+
+
+				//mark i
+				if (ok == 0) {
+					mark[sizeMark][0] = costs1[i];
+					mark[sizeMark][1] = costs2[i];
+					sizeMark++;
+				}
+			}
 
 		for (int i = 0; i < sizeSol; i++) {
-			globalNeigh (i, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
-
-			if (sizeSol > 100)
-				break;
+			printf("/////////////////////////////////////////// \n");
+			printf("index i = %d\ncosts : %d | %d \n",i, costs1[i], costs2[i] );
+			//printf("HVOL : %d \n", associatedHvol[i]);
+			//printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
 		}
 
-		if (oldSol - sizeSol == 0) {
-			if (sameCost (oldCost[0], oldCost[1], costs1[sizeSol - 1], costs2[sizeSol - 1] ) == 1)
-				break;
-		}
 
-		number++;
+		//break;//torem
 	}
 
-	free(oldCost);
-*/
-	int index = 0;
-	while (sizeSol < max - (solu.dat.size + 100)) {
-		index = globalNeigh2 (index, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
-		if (index == -1)
-			break;
-	}
+	free(dominated);
 
-
-
-	// remove first sols 
-	int nbr = 0;
-	while (nbr < 3) {
-		for (int i = 0; i < sizeSol / 2; i++) {
-				costs1[i] = costs1[(sizeSol / 2) + i];
-				costs2[i] = costs2[(sizeSol / 2) + i];
-				for (int k = 0; k < solu.dat.size;k++) {
-					solutions[i][k] = solutions[(sizeSol / 2) + i][k];
-					rows1[i][k] = rows1[(sizeSol / 2) + i][k];
-					rows2[i][k] = rows2[(sizeSol / 2) + i][k];
-					cols1[i][k] = cols1[(sizeSol / 2) + i][k];
-					cols2[i][k] = cols2[(sizeSol / 2) + i][k];
-				}
-			
-		}
-		sizeSol /= 2;
-
-		index /=2;
-		while (sizeSol < max - (solu.dat.size + 100)) {
-			index = globalNeigh2 (index, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
-			if (index == -1)
-				index = sizeSol - (sizeSol /2);
-		}
-		nbr++;
-	}
-
-////////////////// VERIFICATION /////////////////////////
-////////////////////////////////////////////////////////
-/*	for (int i = 0; i < sizeSol; i++) {
+	for (int i = 0; i < sizeSol; i++) {
+		printf("####################################### \n");
 		printf("index i = %d\ncosts : %d | %d \n",i, costs1[i], costs2[i] );
-		//printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
-	}*/
-
-	write_res(costs1, costs2, sizeSol, fileName);
-
+		printf("costs with init : %d | %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
+		printf("HVOL : %d \n", associatedHvol[i]);
+	}
 
 
 /////////////////////////FREE////////////////////////////
 ////////////////////////////////////////////////////////
 	free_matrix(solutions, max);
+	free_matrix(mark, max);
 	free_matrix(rows1,  max);
 	free_matrix(rows2,  max);
 	free_matrix(cols1,  max);
@@ -326,130 +736,19 @@ int global(char* fileName) {
 	free(costs2);
 	free_matrix(solu.mat1, solu.dat.size);
 	free_matrix(solu.mat2, solu.dat.size);
-	free(solu.dat.row_1);
-	free(solu.dat.row_2);
-	free(solu.dat.col_2);
-	free(solu.dat.col_1);
+
 	free(solu.dat.solution);
 
-	return EXIT_SUCCESS;
-
-}
-
-int global2(char* fileName) {
-
-/////////////// INIT////////////////////
-////////////////////////////////////////
-	first_s solu;
-
-	// size + matrix
-	if (parse(fileName, &solu.dat.size, &solu.mat1, &solu.mat2) == EXIT_FAILURE) {
-		return EXIT_FAILURE;
-	}
-
-	// solution
-	generate_random_sol(&solu.dat.solution, solu.dat.size );
-
-	//costs
-	solu.dat.cost_1 = init_cost(solu.mat1, solu.dat.size, solu.dat.solution);
-	solu.dat.cost_2 = init_cost(solu.mat2, solu.dat.size, solu.dat.solution);
-	//row and col
-	init_row_value(&solu.dat.row_1, solu.mat1, solu.dat.size, solu.dat.solution);
-	init_row_value(&solu.dat.row_2, solu.mat2, solu.dat.size, solu.dat.solution);
-	init_col_value(&solu.dat.col_1, solu.mat1, solu.dat.size, solu.dat.solution);
-	init_col_value(&solu.dat.col_2, solu.mat2, solu.dat.size, solu.dat.solution);
 
 
-	int sizeSol = 0;
-	int max;
-
-	if (solu.dat.size < 100)
-		max = 50000;
-	else
-		max = solu.dat.size * 120;
-
-	int ** solutions = (int**)malloc(sizeof(int*) * max);
-	int ** rows1 = (int**)malloc(sizeof(int*) * max);
-	int ** rows2 = (int**)malloc(sizeof(int*) * max);
-	int ** cols1 = (int**)malloc(sizeof(int*) * max);
-	int ** cols2 = (int**)malloc(sizeof(int*) * max);
-	int* costs1 = (int*)malloc(sizeof(int) * max);
-	int* costs2 = (int*)malloc(sizeof(int) * max);
-	for (int i = 0; i < max; i++) {
-		solutions[i] = malloc(sizeof(int) * solu.dat.size);
-		rows1[i] = malloc(sizeof(int) * solu.dat.size);
-		rows2[i] = malloc(sizeof(int) * solu.dat.size);
-		cols1[i] = malloc(sizeof(int) * solu.dat.size);
-		cols2[i] = malloc(sizeof(int) * solu.dat.size);
-	}
-
-
-
-/// add init sol /////
-//////////////////////
-
-	for (int i = 0; i < solu.dat.size; i++) {
-		solutions[0][i] = solu.dat.solution[i];
-		rows1 [0][i] = solu.dat.row_1[i];
-		rows2 [0][i] = solu.dat.row_2[i];
-		cols1 [0][i] = solu.dat.col_1[i];
-		cols2 [0][i] = solu.dat.col_2[i];
-	}
-	costs1[0] = solu.dat.cost_1;
-	costs2[0] = solu.dat.cost_2;
-
-	sizeSol++;
-
-	printf(" INIT COST %d %d \n", costs1[0], costs2[0]);
-
-
-///// Global loop ////////////
-//////////////////////////////
-
-
-	int number = 0;
-	int oldSol = 0;
-	int * oldCost = malloc(sizeof(int) * 2);
-
-
-
-///////////////////////////////NEIGH////////////////////
-//////////////////////////////////////////////////////
-
-
-	int index = 0;
-	while (sizeSol < max - (solu.dat.size + 100)) {
-		index = globalNeigh2 (index, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
-		if (index == -1)
-			index = sizeSol / 2;
-	}
-
-
-	write_res(costs1, costs2, sizeSol, fileName);
-
-/////////////////////////FREE////////////////////////////
-////////////////////////////////////////////////////////
-	free_matrix(solutions, max);
-	free_matrix(rows1,  max);
-	free_matrix(rows2,  max);
-	free_matrix(cols1,  max);
-	free_matrix(cols2,  max);
-	free(costs1);
-	free(costs2);
-	free_matrix(solu.mat1, solu.dat.size);
-	free_matrix(solu.mat2, solu.dat.size);
-	free(solu.dat.row_1);
-	free(solu.dat.row_2);
-	free(solu.dat.col_2);
-	free(solu.dat.col_1);
-	free(solu.dat.solution);
 
 	return EXIT_SUCCESS;
-
 }
 
 
-// when solutions number > 400 => removes 200 + just dominant neigh into loop for
+///////////////////////////////////////////////////////////////////////////////////////////
+// when solutions number > 400 => removes 200 + just dominant neigh into loop for////////////
+///////////////////////////////////////////////////////////////////////////////////////////
 int global3(char* fileName) {
 /////////////// INIT////////////////////
 ////////////////////////////////////////
@@ -724,6 +1023,7 @@ int global4(char* fileName) {
 
 	int testcost1;
 	int testcost2;
+
 	while ( finished == 0/*(number <  500) && (sizeSol <= (max - 2000))*/ /* while sizeSol != sizeMark */) {
 		if ((number % 100) == 0) {
 			numberOfSol[sizeNOS] = sizeSol;		
@@ -752,7 +1052,7 @@ int global4(char* fileName) {
 		ind = rand() % sizeSol;
 
 			
-		globalNeigh (ind, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
+		globalNeigh(ind, solu.dat.size, solu.mat1, solu.mat2, &sizeSol, &solutions, &rows1, &rows2, &cols1, &cols2, &costs1, &costs2);
 
 		int test;
 		int temp;
@@ -781,8 +1081,11 @@ int global4(char* fileName) {
 
 				number++;
 				if(test != 1000000){
-					printf(" == %d ==== %d AND %d \n %d in %d - new i is %d\n", oldCost[0], oldCost[1], number, i, sizeSol, test);
-					break;				
+					printf(" == %d ==== %d AND %d \n %d in %d  - new i = %d\n", oldCost[0], oldCost[1], number, i, sizeSol, test);
+					i = test;			
+				}
+				if (sizeSol > max - (solu.dat.size*2)) {
+					break;
 				}
 			}
 			if ((temp >= sizeSol - 1) || sizeSol > max - (solu.dat.size*2)) {
