@@ -941,8 +941,8 @@ int hbmols(char* fileName) {
 	// hyperVolume
 	int* associatedHvol = malloc(sizeof(int) * max);
 	//Href
-	int x = -100000;
-	int y = -100000;
+	int x = -800000;
+	int y = -800000;
 
 	// costs
 	int* costs1 = (int*)malloc(sizeof(int) * max);
@@ -956,6 +956,9 @@ int hbmols(char* fileName) {
 	int sizeD = 0;
 	int* tmp;
 
+	int ** marked = (int**)malloc(sizeof(int*) * max);
+	int sizeM = 0;
+
 	for (int i = 0; i < max; i++) {
 		solutions[i] = malloc(sizeof(int) * solu.dat.size);
 		rows1[i] = malloc(sizeof(int) * solu.dat.size);
@@ -963,6 +966,7 @@ int hbmols(char* fileName) {
 		cols1[i] = malloc(sizeof(int) * solu.dat.size);
 		cols2[i] = malloc(sizeof(int) * solu.dat.size);
 		alreadyInto[i] = malloc(sizeof(int) * solu.dat.size);
+		marked[i] = malloc(sizeof(int) * 2);
 		sizes[i] = malloc(sizeof(int) * 3);
 		sizes[i][2] = 0;
 	}
@@ -1073,6 +1077,9 @@ int hbmols(char* fileName) {
 
 		for (int i = 0; i < sizeSol; i++) {
 			goodNeighFounded = 0;
+			if (isIntoMark(costs1[i], costs2[i], marked, sizeM) == 1){
+				continue;
+			}
 			while(goodNeighFounded == 0) {
 				toRem = -1;
 
@@ -1128,11 +1135,13 @@ int hbmols(char* fileName) {
 
 				///// if cost < to current sol => continue /////
 				////////////////////////////////////////////////
-				if (tmp[0] < costs1[i] && tmp[1] < costs1[i]) {
+				if (tmp[0] < costs1[i] && tmp[1] < costs2[i]) {
 					//free(tmp);
 					continue;
 				}
-				//TODO : something for equalty => continue
+				if (isIntoSol(tmp[0], tmp[1], costs1, costs2, sizeSol) == 1){
+					continue;
+				}
 
 				/// add new sol//////
 				////////////////////////////
@@ -1228,13 +1237,28 @@ int hbmols(char* fileName) {
 				///////////////////////
 				else {
 					//CHANGE LATER
-					toRem = dominated[0];
-					if (sizeD > 1) {
-						toRem = dominated[sizeD / 2];
+
+				toRem = dominated[0];
+					int value = 0;
+					if(sizeD > 1) {
+						for (int dom = 0; dom < sizeD; dom++) {
+							int volume = 0;
+							for (int m = 0; m < max; m++) {
+								if(costs1[m] > costs1[dominated[dom]]  && costs1[m] > costs2[dominated[dom]]){
+									int tmpVol = (costs1[m] -costs1[dominated[dom]]) * (costs1[m] - costs2[dominated[dom]]) ;
+									if (tmpVol > volume){
+										volume = tmpVol;
+									}
+								}
+							}
+							if (value > volume) {
+								toRem = dominated[dom];
+								value = volume;
+							}
+						}
 					}
+					
 				}
-
-
 
 				if (toRem != ind) {
 					goodNeighFounded = 1;
@@ -1279,19 +1303,54 @@ int hbmols(char* fileName) {
 			}
 			//printf(" i = %d \n", i);
 		}
+		//somewhere => if removed and into mark => remove from mark
+		for (int j = 0; j < sizeM; j++) {
+			int isGood = 0;
+			for (int k = 0; k < sizeSol; k++) {
+				if (costs1[k] == marked[j][0]){
+					isGood = 1;
+					break;
+				}
+			}
+			if (!isGood) {
+				for (int a = j; a < sizeM - 1; a++) {
+					marked[a][0] = marked[a+1][0];
+					marked[a][1] = marked[a+1][1];
+				}
+				sizeM--;
+			}
+		}
+
+		for (int j = 0; j < sizeSol; j++) {
+			if (sizes[j][2] >= solu.dat.size && isIntoMark(sizes[j][0], sizes[j][1], marked, sizeM) == 0){
+				printf("ADDED INTO MARK\n");
+				marked[sizeM][0] = sizes[j][0];
+				marked[sizeM][1] = sizes[j][1];
+				sizeM++;
+				break;
+			}
+		}
+		if(sizeM > 0)
+			printf("SIZE MARK = %d\n", sizeM );
+
+		if (sizeM == max - 1){
+			printf("FINISHED");
+			break;
+		}
 		for (int i = 0; i < sizeSol; i++) {
-			printf("c1 = %d, c2 = %d\n", costs1[i], costs2[i]);
-			printf(" == c1 = %d, c2 = %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
+			printf(" i = %d | c1 = %d, c2 = %d\n",i, costs1[i], costs2[i]);
+			//printf(" == c1 = %d, c2 = %d\n",init_cost(solu.mat1, solu.dat.size, solutions[i]), init_cost(solu.mat2, solu.dat.size, solutions[i]) );
 		}
 		printf("###############\n");
 		nbr++;
 
 		// temp break
-		if (nbr == 10)
+		if (nbr == 200000)
 			break;
 	}
 
 	//TODO: write_res
+	write_res(costs1, costs2, sizeSol, fileName);
 
 	//////free//////
 	////////////////
@@ -1301,6 +1360,8 @@ int hbmols(char* fileName) {
 	free_matrix(cols1, max);
 	free_matrix(cols2, max);
 	free_matrix(solutions, max);
+
+	free_matrix(marked, max);
 
 	free_matrix(solu.mat1, solu.dat.size);
 	free_matrix(solu.mat2, solu.dat.size);
