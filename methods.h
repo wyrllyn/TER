@@ -73,6 +73,8 @@ int sameCost(int c1, int c2, int cc1, int cc2) ;
 
 int * add(int* tab, int toadd, int size);
 
+int hbmols(char* fileName);
+
 
 
 first_s init(char* fileName);

@@ -24,7 +24,9 @@ int main(int argc, char** argv) {
 	begin = clock();
 
 	//global4(fileName3);
-	global_hypervolume2(fileName3);
+	//global_hypervolume2(fileName3);
+
+	hbmols(fileName3);
 
 	end = clock();
 	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
