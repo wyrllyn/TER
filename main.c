@@ -11,8 +11,6 @@ int main(int argc, char** argv) {
 
 	char* fileName3 = "res/mubqp_0.5_2_1000_0.8_0.dat";
 
-	char* fileName2 = "res/mubqp_0.0_2_1000_1.0_0.dat";	
-
 	char* fileName9 ="res/mubqp_-0.5_2_1000_0.8_0.dat";
 
 	char * testFileName = "res/test.dat";
@@ -23,10 +21,9 @@ int main(int argc, char** argv) {
 	double time_spent;
 	begin = clock();
 
-	//global4(fileName3);
-	//global_hypervolume2(fileName3);
+	hbmols(fileName);
 
-	hbmols(fileName3);
+	//solutionsGenerator(fileName9);
 
 	end = clock();
 	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

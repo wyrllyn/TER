@@ -31,7 +31,6 @@ typedef struct first_sol {
 } first_s;
 
 
-int global_hypervolume(char* fileName);
 int global3(char* fileName);
 int global4(char* fileName);
 
@@ -49,9 +48,6 @@ int isIntoMark(int c1, int c2, int** cs, int size);
 int isIntoSol(int c1, int c2, int* cs1, int* cs2, int sizeSol);
 
 int isTheSame (int * first, int * second, int size);
-
-
-int * copy(int const * sol, int size) ;
 
 int* calculate_costs_global(int cost_1, int cost_2, int* row_1, int* row_2, int* col_1, int* col_2, int* solution, int ** mat1, int ** mat2, int index) ;
 
@@ -84,8 +80,6 @@ first_s init(char* fileName);
 
 void free_matrix(int **matrix, int size_x);
 
-void free_tab(m_data * d, int d_size, int size);
-
 int globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
 int globalNeigh2 (int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
 int globalNeigh3 ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2, int cIndex);
@@ -93,5 +87,7 @@ int globalNeigh3 ( int currentSol, int size, int ** mat1, int ** mat2, int* size
 void write_res(int * costs1, int * costs2, int size, char* fileName);
 
 void write_nb(int* solSize, int size, char* fileName);
+
+int solutionsGenerator(char* fileName) ;
 
 #endif
