@@ -30,11 +30,6 @@ typedef struct first_sol {
 	m_data dat;
 } first_s;
 
-
-int global3(char* fileName);
-int global4(char* fileName);
-
-
 void print_mat(int ** mat, int size);
 void print_tab(int* tab, int size);
 void print_cost(m_data d);
@@ -46,8 +41,6 @@ int isInto(int j, int* toRem, int rmsize);
 int isIntoMark(int c1, int c2, int** cs, int size);
 
 int isIntoSol(int c1, int c2, int* cs1, int* cs2, int sizeSol);
-
-int isTheSame (int * first, int * second, int size);
 
 int* calculate_costs_global(int cost_1, int cost_2, int* row_1, int* row_2, int* col_1, int* col_2, int* solution, int ** mat1, int ** mat2, int index) ;
 
@@ -75,18 +68,17 @@ int hbmols(char* fileName);
 
 first_s init(char* fileName);
 
-//void removeGlobal2(m_data * neigh, int sizeN, m_data** solutions, int * sizeSol);
-
-
 void free_matrix(int **matrix, int size_x);
 
 int globalNeigh ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
-int globalNeigh2 (int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2 /* see for gsol & sizeG */);
-int globalNeigh3 ( int currentSol, int size, int ** mat1, int ** mat2, int* sizeSol, int *** sol, int*** rows1, int*** rows2, int*** cols1, int*** cols2, int** costs1, int**costs2, int cIndex);
 
 void write_res(int * costs1, int * costs2, int size, char* fileName);
 
 void write_nb(int* solSize, int size, char* fileName);
+
+int PLS(char* fileName) ;
+
+int hyperVolume(int* costs1, int* costs2, int sizeSol);
 
 int solutionsGenerator(char* fileName) ;
 
